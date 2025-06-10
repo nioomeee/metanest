@@ -1,0 +1,28 @@
+{
+  "name": "metanest",
+  "version": "1.0.0",
+  "description": "> A human-first crypto wallet built to make Web3 feel as easy as GPay.   > Intuitive. Cross-chain. Minimal. Gas-optimized. Made for *real* people.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nioomeee/metanest.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/nioomeee/metanest/issues"
+  },
+  "homepage": "https://github.com/nioomeee/metanest#readme",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "hardhat": "^2.24.2"
+  },
+  "dependencies": {
+    "dotenv": "^16.5.0",
+    "ethers": "^6.14.3"
+  }
+}
