@@ -19,7 +19,7 @@
 ## 🚀 Getting Started
 
 ```bash
-git clone https://github.com/yourusername/MetaNest.git
+git clone https://github.com/nioomeee/MetaNest.git
 cd MetaNest
 npm install
 npx hardhat compile
