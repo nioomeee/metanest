@@ -6,12 +6,13 @@ import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract MetaNestWallet is Ownable, Pausable {
-    // Custom errors
+     // Custom errors
     error InvalidAddress();
     error InvalidAmount();
     error InvalidMemoLength();
     error ContactNotFound();
     error TransferFailed();
+    error InsufficientBalance();
 
     // Events
     event TokenSent(
@@ -21,6 +22,15 @@ contract MetaNestWallet is Ownable, Pausable {
         uint256 amount,
         string memo
     );
+    event EthSent(
+        address indexed from,
+        address indexed to,
+        uint256 amount,
+        string memo
+    );
+
+    event EthDeposited(address indexed user, uint256 amount);
+    event EthWithdrawn(address indexed user, uint256 amount);
     event ContactAdded(address indexed user, address indexed contactAddress, string name);
     event ContactUpdated(address indexed user, address indexed contactAddress, string name);
     event ContactDeleted(address indexed user, address indexed contactAddress);
@@ -41,8 +51,68 @@ contract MetaNestWallet is Ownable, Pausable {
     mapping(address => mapping(address => string)) private _contacts;
     mapping(address => Transaction[MAX_TRANSACTIONS]) private _transactions;
     mapping(address => uint256) private _transactionCounters;
+    mapping(address => uint256) private _ethBalances;
 
     constructor() {}
+
+    // Allow contract to receive ETH
+    receive() external payable {
+        _ethBalances[msg.sender] += msg.value;
+        emit EthDeposited(msg.sender, msg.value);
+    }
+
+    /**
+     * @notice Deposit ETH into the wallet
+     */
+    function depositEth() external payable {
+        _ethBalances[msg.sender] += msg.value;
+        emit EthDeposited(msg.sender, msg.value);
+    }
+
+    /**
+     * @notice Withdraw ETH from the wallet
+     * @param amount The amount of ETH to withdraw
+     */
+    function withdrawEth(uint256 amount) external {
+        if (amount == 0) revert InvalidAmount();
+        if (_ethBalances[msg.sender] < amount) revert InsufficientBalance();
+
+        _ethBalances[msg.sender] -= amount;
+        payable(msg.sender).transfer(amount);
+        emit EthWithdrawn(msg.sender, amount);
+    }
+
+    /**
+     * @notice Send ETH to another address
+     * @param to The recipient address
+     * @param amount The amount of ETH to send
+     * @param memo A short message to attach to the transaction
+     */
+    function sendEth(
+        address to,
+        uint256 amount,
+        string calldata memo
+    ) external payable whenNotPaused {
+        if (to == address(0)) revert InvalidAddress();
+        if (amount == 0) revert InvalidAmount();
+        if (bytes(memo).length > MAX_MEMO_LENGTH) revert InvalidMemoLength();
+        if (_ethBalances[msg.sender] < amount) revert InsufficientBalance();
+
+        _ethBalances[msg.sender] -= amount;
+        payable(to).transfer(amount);
+
+        _addTransaction(msg.sender, address(0), to, amount);
+        emit EthSent(msg.sender, to, amount, memo);
+    }
+
+    /**
+     * @notice Get ETH balance of a user
+     * @param user The user address
+     * @return The ETH balance
+     */
+    function getEthBalance(address user) external view returns (uint256) {
+        return _ethBalances[user];
+    }
 
     function sendToken(
         address token,
