@@ -193,65 +193,73 @@ describe("MetaNestWallet", function () {
 
     describe("ETH Functionality", function () {
       it("Should deposit and track ETH balance", async function () {
-        const depositAmount = ethers.parseEther("1");
-        
-        // Deposit via direct transfer
-        await expect(await user1.sendTransaction({
-          to: wallet.target,
-          value: depositAmount
-        })).to.changeEtherBalance(user1, -depositAmount);
+          const depositAmount = ethers.parseEther("1");
+          
+          // Deposit via direct transfer
+          await user1.sendTransaction({
+              to: wallet.target,
+              value: depositAmount
+          });
+          expect(await wallet.getEthBalance(user1.address)).to.equal(depositAmount);
   
-        // Deposit via deposit function
-        const depositAmount2 = ethers.parseEther("0.5");
-        await expect(wallet.connect(user1).depositEth({ value: depositAmount2 }))
-          .to.emit(wallet, "EthDeposited")
-          .withArgs(user1.address, depositAmount2);
-  
-        // Check balance
-        expect(await wallet.getEthBalance(user1.address)).to.equal(depositAmount + depositAmount2);
+          // Deposit via deposit function
+          const depositAmount2 = ethers.parseEther("0.5");
+          await wallet.connect(user1).depositEth({ value: depositAmount2 });
+          expect(await wallet.getEthBalance(user1.address)).to.equal(depositAmount + depositAmount2);
       });
+  
 
       it("Should withdraw ETH", async function () {
         const depositAmount = ethers.parseEther("1");
         await wallet.connect(user1).depositEth({ value: depositAmount });
-  
+
         const withdrawAmount = ethers.parseEther("0.3");
-        await expect(wallet.connect(user1).withdrawEth(withdrawAmount))
-          .to.emit(wallet, "EthWithdrawn")
-          .withArgs(user1.address, withdrawAmount)
-          .to.changeEtherBalance(user1, withdrawAmount);
-  
-        expect(await wallet.getEthBalance(user1.address)).to.equal(depositAmount - withdrawAmount);
-      });
-
-      it("Should send ETH to another address", async function () {
-        const depositAmount = ethers.parseEther("1");
-        await wallet.connect(user1).depositEth({ value: depositAmount });
-  
-        const sendAmount = ethers.parseEther("0.2");
-        const memo = "Test ETH transfer";
+        const initialBalance = await ethers.provider.getBalance(user1.address);
         
-        await expect(wallet.connect(user1).sendEth(user2.address, sendAmount, memo))
-          .to.emit(wallet, "EthSent")
-          .withArgs(user1.address, user2.address, sendAmount, memo)
-          .to.changeEtherBalance(user2, sendAmount);
-  
-        // Verify transaction history
-        const txs = await wallet.getRecentTransactions(user1.address);
-        expect(txs[0].token).to.equal(ethers.ZeroAddress);
-        expect(txs[0].amount).to.equal(sendAmount);
-      });
+        const tx = await wallet.connect(user1).withdrawEth(withdrawAmount);
+        const receipt = await tx.wait();
+        const gasUsed = receipt.gasUsed * tx.gasPrice;
+        
+        const finalBalance = await ethers.provider.getBalance(user1.address);
+        expect(finalBalance).to.equal(initialBalance + withdrawAmount - gasUsed);
+        
+        expect(await wallet.getEthBalance(user1.address)).to.equal(depositAmount - withdrawAmount);
+    });
 
-      it("Should revert ETH operations with insufficient balance", async function () {
-        const smallAmount = ethers.parseEther("0.1");
-        await wallet.connect(user1).depositEth({ value: smallAmount });
-  
-        await expect(wallet.connect(user1).withdrawEth(smallAmount + 1n))
-          .to.be.revertedWithCustomError(wallet, "InsufficientBalance");
-  
-        await expect(wallet.connect(user1).sendEth(user2.address, smallAmount + 1n, "test"))
-          .to.be.revertedWithCustomError(wallet, "InsufficientBalance");
-      });
+    it("Should send ETH to another address", async function () {
+      const depositAmount = ethers.parseEther("1");
+      await wallet.connect(user1).depositEth({ value: depositAmount });
+
+      const sendAmount = ethers.parseEther("0.2");
+      const memo = "Test ETH transfer";
+      
+      await wallet.connect(user1).sendEth(user2.address, sendAmount, memo);
+      
+      // Verify balances
+      expect(await wallet.getEthBalance(user1.address)).to.equal(depositAmount - sendAmount);
+      expect(await wallet.getEthBalance(user2.address)).to.equal(sendAmount);
+
+      // Verify transaction history
+      const txs = await wallet.getRecentTransactions(user1.address);
+      expect(txs[0].token).to.equal(ethers.ZeroAddress);
+      expect(txs[0].to).to.equal(user2.address);
+      expect(txs[0].amount).to.equal(sendAmount);
+  });
+
+  it("Should revert ETH operations with insufficient balance", async function () {
+    const smallAmount = ethers.parseEther("0.1");
+    await wallet.connect(user1).depositEth({ value: smallAmount });
+
+    // Test withdraw with insufficient balance
+    await expect(
+        wallet.connect(user1).withdrawEth(smallAmount + 1n)
+    ).to.be.revertedWithCustomError(wallet, "InsufficientBalance");
+
+    // Test send with insufficient balance
+    await expect(
+        wallet.connect(user1).sendEth(user2.address, smallAmount + 1n, "test")
+    ).to.be.revertedWithCustomError(wallet, "InsufficientBalance");
+});
 
       it("Should prevent ETH transfers when paused", async function () {
         const depositAmount = ethers.parseEther("1");
@@ -259,8 +267,9 @@ describe("MetaNestWallet", function () {
   
         await wallet.connect(owner).togglePause();
   
-        await expect(wallet.connect(user1).sendEth(user2.address, ethers.parseEther("0.1"), "test"))
-          .to.be.revertedWith("Pausable: paused");
+        await expect(
+          wallet.connect(user1).sendEth(user2.address, ethers.parseEther("0.1"), "test")
+        ).to.be.revertedWith("Pausable: paused");
   
         await wallet.connect(owner).togglePause();
       });

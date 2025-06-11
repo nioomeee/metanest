@@ -6,7 +6,7 @@ import "@openzeppelin/contracts/security/Pausable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract MetaNestWallet is Ownable, Pausable {
-     // Custom errors
+    // Custom errors
     error InvalidAddress();
     error InvalidAmount();
     error InvalidMemoLength();
@@ -99,7 +99,7 @@ contract MetaNestWallet is Ownable, Pausable {
         if (_ethBalances[msg.sender] < amount) revert InsufficientBalance();
 
         _ethBalances[msg.sender] -= amount;
-        payable(to).transfer(amount);
+        _ethBalances[to] += amount;
 
         _addTransaction(msg.sender, address(0), to, amount);
         emit EthSent(msg.sender, to, amount, memo);
