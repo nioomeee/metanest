@@ -210,6 +210,12 @@ describe("MetaNestWallet", function () {
   
 
       it("Should withdraw ETH", async function () {
+        beforeEach(async () => {
+          const MetaNestWallet = await ethers.getContractFactory("MetaNestWallet");
+          wallet = await MetaNestWallet.deploy();
+          await wallet.waitForDeployment();
+        });
+        
         const depositAmount = ethers.parseEther("1");
         await wallet.connect(user1).depositEth({ value: depositAmount });
 
