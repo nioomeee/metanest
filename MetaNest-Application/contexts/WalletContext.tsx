@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { ethers } from 'ethers';
 
 export interface Token {
   symbol: string;
@@ -38,165 +39,117 @@ interface WalletContextType {
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
 
-const MOCK_TOKENS: Token[] = [
-  {
-    symbol: 'ETH',
-    name: 'Ethereum',
-    balance: '2.4567',
-    value: '$6,123.45',
-    change24h: 5.23,
-    icon: '⟠',
-    chain: 'Ethereum'
-  },
-  {
-    symbol: 'BTC',
-    name: 'Bitcoin',
-    balance: '0.1234',
-    value: '$5,432.10',
-    change24h: -2.15,
-    icon: '₿',
-    chain: 'Bitcoin'
-  },
-  {
-    symbol: 'SOL',
-    name: 'Solana',
-    balance: '45.67',
-    value: '$2,345.67',
-    change24h: 8.92,
-    icon: '◎',
-    chain: 'Solana'
-  },
-  {
-    symbol: 'USDC',
-    name: 'USD Coin',
-    balance: '1,234.56',
-    value: '$1,234.56',
-    change24h: 0.01,
-    icon: '○',
-    chain: 'Ethereum'
-  },
-  {
-    symbol: 'MATIC',
-    name: 'Polygon',
-    balance: '2,345.67',
-    value: '$1,876.54',
-    change24h: 12.34,
-    icon: '⬟',
-    chain: 'Polygon'
+// Add this type for window.ethereum
+interface EthereumProvider {
+  isMetaMask?: boolean;
+  request?: (...args: any[]) => Promise<any>;
+}
+declare global {
+  interface Window {
+    ethereum?: EthereumProvider;
   }
-];
-
-const MOCK_TRANSACTIONS: Transaction[] = [
-  {
-    id: '1',
-    type: 'receive',
-    token: 'ETH',
-    amount: '0.5',
-    from: '0x1234...5678',
-    to: '0x9876...5432',
-    status: 'confirmed',
-    timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000),
-    hash: '0xabcd...efgh',
-    fee: '0.002'
-  },
-  {
-    id: '2',
-    type: 'send',
-    token: 'USDC',
-    amount: '150.00',
-    from: '0x9876...5432',
-    to: '0x2468...1357',
-    status: 'confirmed',
-    timestamp: new Date(Date.now() - 5 * 60 * 60 * 1000),
-    hash: '0xijkl...mnop',
-    fee: '0.001'
-  },
-  {
-    id: '3',
-    type: 'send',
-    token: 'SOL',
-    amount: '10.0',
-    from: '0x9876...5432',
-    to: '0x1357...2468',
-    status: 'pending',
-    timestamp: new Date(Date.now() - 30 * 60 * 1000),
-    hash: '0xqrst...uvwx',
-    fee: '0.0005'
-  },
-  {
-    id: '4',
-    type: 'receive',
-    token: 'BTC',
-    amount: '0.025',
-    from: '0x3691...2580',
-    to: '0x9876...5432',
-    status: 'confirmed',
-    timestamp: new Date(Date.now() - 24 * 60 * 60 * 1000),
-    hash: '0xyzab...cdef',
-    fee: '0.00015'
-  }
-];
+}
 
 export function WalletProvider({ children }: { children: React.ReactNode }) {
   const [isConnected, setIsConnected] = useState(false);
   const [address, setAddress] = useState('');
-  const [balance, setBalance] = useState('$15,011.32');
-  const [tokens, setTokens] = useState<Token[]>(MOCK_TOKENS);
-  const [transactions, setTransactions] = useState<Transaction[]>(MOCK_TRANSACTIONS);
+  const [balance, setBalance] = useState('');
+  const [tokens, setTokens] = useState<Token[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [provider, setProvider] = useState<ethers.BrowserProvider | null>(null);
 
-  const connectWallet = () => {
-    // Simulate wallet connection
-    setTimeout(() => {
-      setIsConnected(true);
-      setAddress('0x9876...5432');
-    }, 1000);
+  useEffect(() => {
+    if (window.ethereum && isConnected) {
+      const ethProvider = new ethers.BrowserProvider(window.ethereum);
+      setProvider(ethProvider);
+      ethProvider
+        .send('eth_requestAccounts', [])
+        .then(async (accounts: string[]) => {
+          if (accounts.length > 0) {
+            setAddress(accounts[0]);
+            const bal = await ethProvider.getBalance(accounts[0]);
+            setBalance(ethers.formatEther(bal) + ' ETH');
+          }
+        });
+    }
+  }, [isConnected]);
+
+  const connectWallet = async () => {
+    if (window.ethereum) {
+      try {
+        const ethProvider = new ethers.BrowserProvider(window.ethereum);
+        const accounts = await ethProvider.send('eth_requestAccounts', []);
+        if (accounts.length > 0) {
+          setIsConnected(true);
+          setAddress(accounts[0]);
+          const bal = await ethProvider.getBalance(accounts[0]);
+          setBalance(ethers.formatEther(bal) + ' ETH');
+        }
+      } catch (err) {
+        alert('Wallet connection failed.');
+      }
+    } else {
+      alert(
+        'MetaMask is not installed. Please install MetaMask and try again.'
+      );
+    }
   };
 
   const disconnectWallet = () => {
     setIsConnected(false);
     setAddress('');
+    setBalance('');
+    setTokens([]);
+    setTransactions([]);
+    setProvider(null);
   };
 
   const sendTransaction = async (to: string, amount: string, token: string) => {
-    // Simulate transaction
-    const newTransaction: Transaction = {
-      id: Date.now().toString(),
-      type: 'send',
-      token,
-      amount,
-      from: address,
-      to,
-      status: 'pending',
-      timestamp: new Date(),
-      hash: `0x${Math.random().toString(16).substring(2, 18)}...${Math.random().toString(16).substring(2, 6)}`,
-      fee: (Math.random() * 0.01).toFixed(6)
-    };
-
-    setTransactions(prev => [newTransaction, ...prev]);
-
-    // Simulate confirmation after 3 seconds
-    setTimeout(() => {
-      setTransactions(prev => 
-        prev.map(tx => 
-          tx.id === newTransaction.id 
-            ? { ...tx, status: 'confirmed' as const }
-            : tx
-        )
-      );
-    }, 3000);
+    if (!provider || !address) return;
+    try {
+      const signer = await provider.getSigner();
+      const tx = await signer.sendTransaction({
+        to,
+        value: ethers.parseEther(amount),
+      });
+      await tx.wait();
+      // Optionally, update balance and transactions here
+      const bal = await provider.getBalance(address);
+      setBalance(ethers.formatEther(bal) + ' ETH');
+      // For now, just add a simple transaction record
+      setTransactions((prev) => [
+        {
+          id: tx.hash,
+          type: 'send',
+          token: 'ETH',
+          amount,
+          from: address,
+          to,
+          status: 'confirmed',
+          timestamp: new Date(),
+          hash: tx.hash,
+          fee: '',
+        },
+        ...prev,
+      ]);
+    } catch (err) {
+      alert('Transaction failed.');
+    }
   };
 
   return (
-    <WalletContext.Provider value={{
-      isConnected,
-      address,
-      balance,
-      tokens,
-      transactions,
-      connectWallet,
-      disconnectWallet,
-      sendTransaction
-    }}>
+    <WalletContext.Provider
+      value={{
+        isConnected,
+        address,
+        balance,
+        tokens,
+        transactions,
+        connectWallet,
+        disconnectWallet,
+        sendTransaction,
+      }}
+    >
       {children}
     </WalletContext.Provider>
   );
@@ -204,7 +157,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 
 export function useWallet() {
   const context = useContext(WalletContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useWallet must be used within a WalletProvider');
   }
   return context;

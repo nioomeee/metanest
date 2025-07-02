@@ -7,8 +7,9 @@ import { Toaster } from '@/components/ui/sonner';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'NovaWallet - Next-Gen Crypto Wallet',
-  description: 'A futuristic multi-chain crypto wallet for the decentralized future',
+  title: 'Metanest - Next-Gen Crypto Wallet',
+  description:
+    'A futuristic multi-chain crypto wallet for the decentralized future',
 };
 
 export default function RootLayout({

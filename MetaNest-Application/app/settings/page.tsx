@@ -1,19 +1,19 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { 
-  ArrowLeft, 
-  Shield, 
-  Key, 
-  Eye, 
-  EyeOff, 
+import {
+  ArrowLeft,
+  Shield,
+  Key,
+  Eye,
+  EyeOff,
   Download,
   Bell,
   Globe,
   Smartphone,
   AlertTriangle,
   Moon,
-  Palette
+  Palette,
 } from 'lucide-react';
 import { Navigation } from '@/components/Navigation';
 import { useWallet } from '@/contexts/WalletContext';
@@ -35,9 +35,9 @@ export default function SettingsPage() {
   });
 
   const handleSettingChange = (key: keyof typeof settings) => {
-    setSettings(prev => ({
+    setSettings((prev) => ({
       ...prev,
-      [key]: !prev[key]
+      [key]: !prev[key],
     }));
     toast.success('Setting updated');
   };
@@ -61,7 +61,10 @@ export default function SettingsPage() {
               animate={{ opacity: 1, y: 0 }}
               className="nova-card p-12 rounded-3xl nova-glow"
             >
-              <Shield size={80} className="mx-auto mb-8 text-[rgb(var(--nova-accent))]" />
+              <Shield
+                size={80}
+                className="mx-auto mb-8 text-[rgb(var(--nova-accent))]"
+              />
               <h2 className="text-3xl font-bold mb-6">Connect Your Wallet</h2>
               <p className="text-[rgb(var(--nova-text-dim))] mb-8 text-lg">
                 Please connect your wallet to access settings.
@@ -77,7 +80,7 @@ export default function SettingsPage() {
   return (
     <div className="min-h-screen bg-[rgb(var(--nova-bg))]">
       <Navigation />
-      
+
       <main className="max-w-4xl mx-auto p-6 lg:p-8">
         {/* Header */}
         <motion.div
@@ -86,7 +89,7 @@ export default function SettingsPage() {
           className="flex items-center justify-between mb-12"
         >
           <div className="flex items-center space-x-4">
-            <Link 
+            <Link
               href="/dashboard"
               className="p-3 rounded-xl hover:bg-[rgb(var(--nova-card))] transition-colors"
             >
@@ -113,17 +116,21 @@ export default function SettingsPage() {
               <Shield size={28} className="text-[rgb(var(--nova-accent))]" />
               <span>Account Information</span>
             </h2>
-            
+
             <div className="space-y-6">
               <div>
-                <label className="block font-medium mb-3 text-lg">Wallet Address</label>
+                <label className="block font-medium mb-3 text-lg">
+                  Wallet Address
+                </label>
                 <div className="nova-card p-6 rounded-2xl font-mono break-all">
                   {address}
                 </div>
               </div>
-              
+
               <div>
-                <label className="block font-medium mb-3 text-lg">Network</label>
+                <label className="block font-medium mb-3 text-lg">
+                  Network
+                </label>
                 <div className="nova-card p-6 rounded-2xl">
                   <div className="flex items-center space-x-4">
                     <div className="w-4 h-4 bg-[rgb(var(--nova-accent))] rounded-full"></div>
@@ -145,20 +152,21 @@ export default function SettingsPage() {
               <Key size={28} className="text-[rgb(var(--nova-accent))]" />
               <span>Security</span>
             </h2>
-            
+
             <div className="space-y-8">
               {/* Private Key */}
               <div className="p-6 nova-card rounded-2xl border border-red-400/20">
                 <div className="flex items-start space-x-4">
                   <AlertTriangle size={24} className="text-red-400 mt-1" />
                   <div className="flex-1">
-                    <h3 className="font-semibold text-red-400 mb-4 text-lg">Private Key</h3>
+                    <h3 className="font-semibold text-red-400 mb-4 text-lg">
+                      Private Key
+                    </h3>
                     <div className="mb-6">
                       <div className="bg-black/50 p-4 rounded-xl font-mono">
-                        {showPrivateKey 
+                        {showPrivateKey
                           ? '0x1234567890abcdef1234567890abcdef12345678'
-                          : '••••••••••••••••••••••••••••••••••••••••'
-                        }
+                          : '••••••••••••••••••••••••••••••••••••••••'}
                       </div>
                     </div>
                     <div className="flex space-x-4">
@@ -166,7 +174,11 @@ export default function SettingsPage() {
                         onClick={() => setShowPrivateKey(!showPrivateKey)}
                         className="flex items-center space-x-2 px-4 py-2 bg-red-400/20 text-red-400 rounded-xl hover:bg-red-400/30 transition-colors"
                       >
-                        {showPrivateKey ? <EyeOff size={18} /> : <Eye size={18} />}
+                        {showPrivateKey ? (
+                          <EyeOff size={18} />
+                        ) : (
+                          <Eye size={18} />
+                        )}
                         <span>{showPrivateKey ? 'Hide' : 'Show'}</span>
                       </button>
                       <button
@@ -185,9 +197,14 @@ export default function SettingsPage() {
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
-                    <Smartphone size={24} className="text-[rgb(var(--nova-text-dim))]" />
+                    <Smartphone
+                      size={24}
+                      className="text-[rgb(var(--nova-text-dim))]"
+                    />
                     <div>
-                      <div className="font-medium text-lg">Biometric Authentication</div>
+                      <div className="font-medium text-lg">
+                        Biometric Authentication
+                      </div>
                       <div className="text-[rgb(var(--nova-text-dim))]">
                         Use fingerprint or face ID
                       </div>
@@ -201,7 +218,10 @@ export default function SettingsPage() {
 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
-                    <Shield size={24} className="text-[rgb(var(--nova-text-dim))]" />
+                    <Shield
+                      size={24}
+                      className="text-[rgb(var(--nova-text-dim))]"
+                    />
                     <div>
                       <div className="font-medium text-lg">Auto-Lock</div>
                       <div className="text-[rgb(var(--nova-text-dim))]">
@@ -229,13 +249,18 @@ export default function SettingsPage() {
               <Palette size={28} className="text-[rgb(var(--nova-accent))]" />
               <span>Preferences</span>
             </h2>
-            
+
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
-                  <Bell size={24} className="text-[rgb(var(--nova-text-dim))]" />
+                  <Bell
+                    size={24}
+                    className="text-[rgb(var(--nova-text-dim))]"
+                  />
                   <div>
-                    <div className="font-medium text-lg">Push Notifications</div>
+                    <div className="font-medium text-lg">
+                      Push Notifications
+                    </div>
                     <div className="text-[rgb(var(--nova-text-dim))]">
                       Get notified about transactions
                     </div>
@@ -249,23 +274,26 @@ export default function SettingsPage() {
 
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
-                  <Moon size={24} className="text-[rgb(var(--nova-text-dim))]" />
+                  <Moon
+                    size={24}
+                    className="text-[rgb(var(--nova-text-dim))]"
+                  />
                   <div>
                     <div className="font-medium text-lg">Dark Mode</div>
                     <div className="text-[rgb(var(--nova-text-dim))]">
-                      Always enabled for NovaWallet
+                      Always enabled for Metanest
                     </div>
                   </div>
                 </div>
-                <Switch
-                  checked={settings.darkMode}
-                  disabled={true}
-                />
+                <Switch checked={settings.darkMode} disabled={true} />
               </div>
 
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
-                  <Globe size={24} className="text-[rgb(var(--nova-text-dim))]" />
+                  <Globe
+                    size={24}
+                    className="text-[rgb(var(--nova-text-dim))]"
+                  />
                   <div>
                     <div className="font-medium text-lg">Testnet Mode</div>
                     <div className="text-[rgb(var(--nova-text-dim))]">
@@ -292,10 +320,12 @@ export default function SettingsPage() {
               <AlertTriangle size={28} />
               <span>Danger Zone</span>
             </h2>
-            
+
             <div className="space-y-6">
               <div className="p-6 bg-red-400/10 rounded-2xl">
-                <h3 className="font-semibold text-red-400 mb-3 text-lg">Disconnect Wallet</h3>
+                <h3 className="font-semibold text-red-400 mb-3 text-lg">
+                  Disconnect Wallet
+                </h3>
                 <p className="text-[rgb(var(--nova-text-dim))] mb-4">
                   This will disconnect your wallet from the application.
                 </p>
@@ -308,9 +338,12 @@ export default function SettingsPage() {
               </div>
 
               <div className="p-6 bg-red-400/10 rounded-2xl">
-                <h3 className="font-semibold text-red-400 mb-3 text-lg">Reset Wallet</h3>
+                <h3 className="font-semibold text-red-400 mb-3 text-lg">
+                  Reset Wallet
+                </h3>
                 <p className="text-[rgb(var(--nova-text-dim))] mb-4">
-                  This will permanently delete all wallet data. This action cannot be undone.
+                  This will permanently delete all wallet data. This action
+                  cannot be undone.
                 </p>
                 <button
                   onClick={resetWallet}
