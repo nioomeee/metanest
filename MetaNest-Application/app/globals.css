@@ -1,0 +1,84 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --nova-bg: 14, 14, 16; /* #0e0e10 */
+  --nova-card: 26, 26, 31; /* #1a1a1f */
+  --nova-accent: 0, 255, 224; /* #00ffe0 */
+  --nova-purple: 139, 92, 246; /* #8b5cf6 */
+  --nova-text: 240, 240, 245; /* #f0f0f5 */
+  --nova-text-dim: 156, 163, 175; /* #9ca3af */
+  --nova-border: 55, 65, 81; /* #374151 */
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-[rgb(var(--nova-bg))] text-[rgb(var(--nova-text))] antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    @apply bg-[rgb(var(--nova-accent))] bg-opacity-30 rounded-full;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-[rgb(var(--nova-accent))] bg-opacity-50;
+  }
+}
+
+@layer components {
+  .nova-card {
+    @apply bg-[rgb(var(--nova-card))] border border-[rgb(var(--nova-border))] backdrop-blur-xl;
+  }
+  
+  .nova-glow {
+    box-shadow: 0 0 20px rgba(var(--nova-accent), 0.3);
+  }
+  
+  .nova-glow-purple {
+    box-shadow: 0 0 20px rgba(var(--nova-purple), 0.3);
+  }
+  
+  .nova-gradient {
+    background: linear-gradient(135deg, rgb(var(--nova-accent)), rgb(var(--nova-purple)));
+  }
+  
+  .nova-gradient-text {
+    background: linear-gradient(135deg, rgb(var(--nova-accent)), rgb(var(--nova-purple)));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .nova-button {
+    @apply bg-[rgb(var(--nova-accent))] text-black font-semibold px-6 py-3 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-[rgb(var(--nova-accent))]/25 hover:scale-105 active:scale-95;
+  }
+  
+  .nova-button-secondary {
+    @apply bg-[rgb(var(--nova-card))] text-[rgb(var(--nova-text))] border border-[rgb(var(--nova-accent))] font-semibold px-6 py-3 rounded-xl transition-all duration-300 hover:bg-[rgb(var(--nova-accent))]/10 hover:shadow-lg hover:shadow-[rgb(var(--nova-accent))]/25;
+  }
+  
+  .nova-input {
+    @apply bg-[rgb(var(--nova-card))] border border-[rgb(var(--nova-border))] text-[rgb(var(--nova-text))] placeholder:text-[rgb(var(--nova-text-dim))] rounded-xl px-4 py-3 focus:border-[rgb(var(--nova-accent))] focus:ring-2 focus:ring-[rgb(var(--nova-accent))]/20 focus:outline-none transition-all duration-300;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
