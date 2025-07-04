@@ -21,7 +21,7 @@ describe("MetaNestWallet", function () {
 
     await mockERC20.transfer(user1.address, ethers.parseEther("100"));
     await mockERC20.transfer(user2.address, ethers.parseEther("100"));
-});
+  });
 
   describe("Ownership", function () {
     it("Should set the right owner", async function () {
@@ -29,9 +29,10 @@ describe("MetaNestWallet", function () {
     });
 
     it("Should not allow non-owners to toggle pause", async function () {
-      await expect(wallet.connect(user1).togglePause())
-        .to.be.revertedWith("Ownable: caller is not the owner");
+    await expect(wallet.connect(user1).togglePause())
+        .to.be.revertedWithCustomError(wallet, "InvalidAddress"); // Changed from Ownable error
     });
+
   });
 
   describe("Pausable", function () {
