@@ -85,3 +85,5 @@ frontend/.cache/
 *.swo
 .DS_Store
 
+# private keys
+hardhat.config.js
