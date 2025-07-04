@@ -86,4 +86,4 @@ frontend/.cache/
 .DS_Store
 
 # private keys
-hardhat.config.js
+*.config.js
