@@ -4,9 +4,9 @@ require("@openzeppelin/hardhat-upgrades");
 module.exports = {
   solidity: "0.8.20",
   paths: {
+    artifacts: "./artifacts",
+    cache: "./cache",
     sources: "./contracts",
     tests: "./test",
-    cache: "./cache",
-    artifacts: "./artifacts"
   },
 };

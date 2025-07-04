@@ -1,25 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-// Correct import paths (notice the /governance/ for some files)
-import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/metatx/ERC2771ContextUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/cryptography/EIP712Upgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/Pausable.sol";          
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/metatx/ERC2771Context.sol";
+import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
+import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
-contract MetaNestWallet is 
-    Ownable, 
-    Pausable, 
-    ReentrancyGuard, 
-    ERC2771Context, 
-    UUPSUpgradeable,
-    EIP712
-{
+contract MetaNestWallet is Ownable, Pausable, ReentrancyGuard, ERC2771Context, EIP712 {
     // Custom errors
     error InvalidAddress();
     error InvalidAmount();
@@ -88,40 +78,25 @@ contract MetaNestWallet is
     mapping(address => address[]) private _guardians;
     mapping(address => RecoveryInfo) private _recoveries;
 
-    // Trusted forwarder for meta transactions
-    constructor(address trustedForwarder) 
+    constructor(address initialOwner, address trustedForwarder) 
         ERC2771Context(trustedForwarder)
         EIP712("MetaNestWallet", "1")
+        Ownable(initialOwner)
     {
-        // Initialize the implementation (will not be used as this is UUPS)
-        _disableInitializers();
+        // Initial owner is the deployer
+        _transferOwnership(msg.sender);
     }
 
-    // Initialize function for proxy
-    function initialize(address initialOwner, address trustedForwarder) public initializer {
-        __ERC2771Context_init(trustedForwarder);
-        __EIP712_init("MetaNestWallet", "1");
-        _transferOwnership(initialOwner);    
-    }
-
-    // Allow contract to receive ETH
     receive() external payable {
         _ethBalances[_msgSender()] += msg.value;
         emit EthDeposited(_msgSender(), msg.value);
     }
 
-    /**
-     * @notice Deposit ETH into the wallet
-     */
     function depositEth() external payable {
         _ethBalances[_msgSender()] += msg.value;
         emit EthDeposited(_msgSender(), msg.value);
     }
 
-    /**
-     * @notice Withdraw ETH from the wallet
-     * @param amount The amount of ETH to withdraw
-     */
     function withdrawEth(uint256 amount) external nonReentrant {
         if (amount == 0) revert InvalidAmount();
         if (_ethBalances[_msgSender()] < amount) revert InsufficientBalance();
@@ -133,12 +108,6 @@ contract MetaNestWallet is
         emit EthWithdrawn(_msgSender(), amount);
     }
 
-    /**
-     * @notice Send ETH to another address
-     * @param to The recipient address
-     * @param amount The amount of ETH to send
-     * @param memo A short message to attach to the transaction
-     */
     function sendEth(
         address to,
         uint256 amount,
@@ -156,12 +125,6 @@ contract MetaNestWallet is
         emit EthSent(_msgSender(), to, amount, memo);
     }
 
-    /**
-     * @notice Send ETH to multiple addresses in a single transaction
-     * @param recipients Array of recipient addresses
-     * @param amounts Array of amounts to send
-     * @param memos Array of memos (can be empty strings)
-     */
     function batchSendEth(
         address[] calldata recipients,
         uint256[] calldata amounts,
@@ -191,22 +154,10 @@ contract MetaNestWallet is
         emit BatchTransfer(_msgSender(), recipients.length);
     }
 
-    /**
-     * @notice Get ETH balance of a user
-     * @param user The user address
-     * @return The ETH balance
-     */
     function getEthBalance(address user) external view returns (uint256) {
         return _ethBalances[user];
     }
 
-    /**
-     * @notice Send ERC20 tokens to another address
-     * @param token The token contract address
-     * @param to The recipient address
-     * @param amount The amount to send
-     * @param memo A short message to attach to the transaction
-     */
     function sendToken(
         address token,
         address to,
@@ -225,13 +176,6 @@ contract MetaNestWallet is
         emit TokenSent(_msgSender(), to, token, amount, memo);
     }
 
-    /**
-     * @notice Send ERC20 tokens to multiple addresses in a single transaction
-     * @param token The token contract address
-     * @param recipients Array of recipient addresses
-     * @param amounts Array of amounts to send
-     * @param memos Array of memos (can be empty strings)
-     */
     function batchSendTokens(
         address token,
         address[] calldata recipients,
@@ -264,7 +208,6 @@ contract MetaNestWallet is
         emit BatchTransfer(_msgSender(), recipients.length);
     }
 
-    // Contact management functions
     function addContact(address contactAddress, string calldata name) external {
         if (contactAddress == address(0)) revert InvalidAddress();
         if (bytes(name).length == 0) revert InvalidMemoLength();
@@ -293,11 +236,9 @@ contract MetaNestWallet is
         return _contacts[user][contactAddress];
     }
 
-    // Social recovery functions
     function setGuardians(address[] calldata guardians) external {
         if (guardians.length < MIN_GUARDIANS) revert InvalidGuardians();
         
-        // Check for duplicates and invalid addresses
         for (uint256 i = 0; i < guardians.length; i++) {
             if (guardians[i] == address(0)) revert InvalidAddress();
             for (uint256 j = i + 1; j < guardians.length; j++) {
@@ -326,7 +267,6 @@ contract MetaNestWallet is
         if (_recoveries[oldOwner].deadline == 0) revert RecoveryNotInitiated();
         if (block.timestamp > _recoveries[oldOwner].deadline) revert RecoveryTimeNotElapsed();
 
-        // Verify the guardian
         bool isGuardian = false;
         address[] storage guardians = _guardians[oldOwner];
         for (uint256 i = 0; i < guardians.length; i++) {
@@ -337,7 +277,6 @@ contract MetaNestWallet is
         }
         if (!isGuardian) revert InvalidAddress();
 
-        // Verify the signature
         bytes32 digest = _hashTypedDataV4(keccak256(
             abi.encode(
                 _RECOVERY_TYPEHASH,
@@ -351,8 +290,7 @@ contract MetaNestWallet is
 
         _recoveries[oldOwner].guardiansApproved++;
 
-        // Check if we have enough approvals
-        uint256 requiredApprovals = (guardians.length * 2) / 3; // 2/3 majority
+        uint256 requiredApprovals = (guardians.length * 2) / 3;
         if (_recoveries[oldOwner].guardiansApproved >= requiredApprovals) {
             _completeRecovery(oldOwner);
         }
@@ -361,16 +299,11 @@ contract MetaNestWallet is
     function _completeRecovery(address oldOwner) private {
         address newOwner = _recoveries[oldOwner].newOwner;
         
-        // Transfer ETH balance
         uint256 ethBalance = _ethBalances[oldOwner];
         if (ethBalance > 0) {
             _ethBalances[oldOwner] = 0;
             _ethBalances[newOwner] = ethBalance;
         }
-
-        // Transfer contacts (simplified - in reality might need more complex handling)
-        // Note: This is a simplified approach. In production, you might want to handle
-        // contact transfer differently or let the new owner import contacts manually.
 
         emit RecoveryCompleted(oldOwner, newOwner);
         delete _recoveries[oldOwner];
@@ -389,7 +322,6 @@ contract MetaNestWallet is
         return _guardians[user];
     }
 
-    // Transaction history functions
     function getRecentTransactions(address user) external view returns (Transaction[] memory) {
         uint256 count = _transactionCounters[user] > MAX_TRANSACTIONS 
             ? MAX_TRANSACTIONS 
@@ -408,7 +340,6 @@ contract MetaNestWallet is
         return transactions;
     }
 
-    // Admin functions
     function togglePause() external onlyOwner {
         if (paused()) {
             _unpause();
@@ -416,11 +347,10 @@ contract MetaNestWallet is
             _pause();
         }
     }
+    function _contextSuffixLength() internal view virtual override(Context, ERC2771Context) returns (uint256) {
+        return ERC2771Context._contextSuffixLength();
+    }
 
-    // UUPS upgrade function - only owner can upgrade
-    function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
-
-    // ERC2771 context overrides
     function _msgSender() internal view virtual override(Context, ERC2771Context) returns (address) {
         return ERC2771Context._msgSender();
     }
@@ -429,7 +359,6 @@ contract MetaNestWallet is
         return ERC2771Context._msgData();
     }
 
-    // Internal functions
     function _addTransaction(address user, address token, address to, uint256 amount) private {
         uint256 index = _transactionCounters[user] % MAX_TRANSACTIONS;
         _transactions[user][index] = Transaction({
