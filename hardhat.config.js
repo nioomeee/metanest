@@ -9,4 +9,10 @@ module.exports = {
     sources: "./contracts",
     tests: "./test",
   },
+  networks: {
+    mumbai: {
+      url: process.env.MUMBAI_RPC,
+      accounts: [process.env.PRIVATE_KEY]
+    }
+  }
 };
