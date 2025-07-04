@@ -9,19 +9,19 @@ describe("MetaNestWallet", function () {
   let mockERC20;
 
   before(async function () {
-    [owner, user1, user2] = await ethers.getSigners();
+    [owner, user1, user2, trustedForwarder] = await ethers.getSigners();
 
     const MockERC20 = await ethers.getContractFactory("MockERC20");
     mockERC20 = await MockERC20.deploy("Test Token", "TEST", ethers.parseEther("1000"));
     await mockERC20.waitForDeployment();
 
     const MetaNestWallet = await ethers.getContractFactory("MetaNestWallet");
-    wallet = await MetaNestWallet.deploy();
+    wallet = await MetaNestWallet.deploy(owner.address, trustedForwarder.address);
     await wallet.waitForDeployment();
 
     await mockERC20.transfer(user1.address, ethers.parseEther("100"));
     await mockERC20.transfer(user2.address, ethers.parseEther("100"));
-  });
+});
 
   describe("Ownership", function () {
     it("Should set the right owner", async function () {
@@ -138,7 +138,7 @@ describe("MetaNestWallet", function () {
       const amount = ethers.parseEther("1");
 
       const MetaNestWallet = await ethers.getContractFactory("MetaNestWallet");
-      const freshWallet = await MetaNestWallet.deploy();
+      const freshWallet = await MetaNestWallet.deploy(owner.address, trustedForwarder.address);
       await freshWallet.waitForDeployment();
 
       await mockERC20.connect(user1).approve(freshWallet.target, amount * 5n);
@@ -195,7 +195,7 @@ describe("MetaNestWallet", function () {
 
       beforeEach(async () => {
         const MetaNestWallet = await ethers.getContractFactory("MetaNestWallet");
-        wallet = await MetaNestWallet.deploy();
+        wallet = await MetaNestWallet.deploy(owner.address, trustedForwarder.address);
         await wallet.waitForDeployment();
       });
 
