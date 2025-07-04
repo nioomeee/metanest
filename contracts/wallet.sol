@@ -159,22 +159,23 @@ contract MetaNestWallet is Ownable, Pausable, ReentrancyGuard, ERC2771Context, E
     }
 
     function sendToken(
-        address token,
-        address to,
-        uint256 amount,
-        string calldata memo
-    ) external whenNotPaused {
-        if (token == address(0)) revert InvalidAddress();
-        if (to == address(0)) revert InvalidAddress();
-        if (amount == 0) revert InvalidAmount();
-        if (bytes(memo).length > MAX_MEMO_LENGTH) revert InvalidMemoLength();
+    address token,
+    address to,
+    uint256 amount,
+    string calldata memo
+) external whenNotPaused {
+    if (token == address(0)) revert InvalidAddress();
+    if (to == address(0)) revert InvalidAddress();
+    if (amount == 0) revert InvalidAmount();
+    if (bytes(memo).length > MAX_MEMO_LENGTH) revert InvalidMemoLength();
 
-        bool success = IERC20(token).transferFrom(_msgSender(), to, amount);
-        if (!success) revert TransferFailed();
-
+    try IERC20(token).transferFrom(_msgSender(), to, amount) {
         _addTransaction(_msgSender(), token, to, amount);
         emit TokenSent(_msgSender(), to, token, amount, memo);
+    } catch {
+        revert TransferFailed();
     }
+}
 
     function batchSendTokens(
         address token,

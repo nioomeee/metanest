@@ -120,9 +120,10 @@ describe("MetaNestWallet", function () {
     const memo = "Test transfer";
     await mockERC20.connect(user1).approve(wallet.target, amount);
 
-    await expect(wallet.connect(user1).sendToken(mockERC20.target, user2.address, amount, memo))
-        .to.be.revertedWithCustomError(wallet, "TransferFailed");
-    });
+    await expect(
+        wallet.connect(user1).sendToken(mockERC20.target, user2.address, amount, memo)
+    ).to.be.revertedWithCustomError(wallet, "TransferFailed");
+});
   });
 
   describe("Contact Management", function () {
