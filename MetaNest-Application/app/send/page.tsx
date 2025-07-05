@@ -1,13 +1,13 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { 
-  ArrowLeft, 
-  Send, 
-  QrCode, 
+import {
+  ArrowLeft,
+  Send,
+  QrCode,
   AlertTriangle,
   CheckCircle,
-  Loader2
+  Loader2,
 } from 'lucide-react';
 import { Navigation } from '@/components/Navigation';
 import { useWallet } from '@/contexts/WalletContext';
@@ -18,15 +18,19 @@ import { toast } from 'sonner';
 
 export default function SendPage() {
   const { isConnected, tokens, sendTransaction } = useWallet();
-  const [selectedToken, setSelectedToken] = useState(tokens[0]?.symbol || 'ETH');
+  const [selectedToken, setSelectedToken] = useState(
+    tokens[0]?.symbol || 'ETH'
+  );
   const [recipient, setRecipient] = useState('');
   const [amount, setAmount] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
 
-  const selectedTokenData = tokens.find(t => t.symbol === selectedToken);
+  const selectedTokenData = tokens.find((t) => t.symbol === selectedToken);
   const estimatedFee = '0.002';
-  const estimatedTotal = amount ? (parseFloat(amount) + parseFloat(estimatedFee)).toFixed(6) : '0';
+  const estimatedTotal = amount
+    ? (parseFloat(amount) + parseFloat(estimatedFee)).toFixed(6)
+    : '0';
 
   const handleSend = async () => {
     if (!amount || !recipient) {
@@ -39,7 +43,10 @@ export default function SendPage() {
       return;
     }
 
-    if (selectedTokenData && parseFloat(amount) > parseFloat(selectedTokenData.balance)) {
+    if (
+      selectedTokenData &&
+      parseFloat(amount) > parseFloat(selectedTokenData.balance)
+    ) {
       toast.error('Insufficient balance');
       return;
     }
@@ -73,12 +80,17 @@ export default function SendPage() {
               animate={{ opacity: 1, y: 0 }}
               className="nova-card p-12 rounded-3xl nova-glow"
             >
-              <Send size={80} className="mx-auto mb-8 text-[rgb(var(--nova-accent))]" />
+              <Send
+                size={80}
+                className="mx-auto mb-8 text-[rgb(var(--nova-accent))]"
+              />
               <h2 className="text-3xl font-bold mb-6">Connect Your Wallet</h2>
               <p className="text-[rgb(var(--nova-text-dim))] mb-8 text-lg">
                 Please connect your wallet to send crypto.
               </p>
-              <WalletConnect />
+              <div className="flex flex-col items-center justify-center">
+                <WalletConnect />
+              </div>
             </motion.div>
           </div>
         </main>
@@ -89,7 +101,7 @@ export default function SendPage() {
   return (
     <div className="min-h-screen bg-[rgb(var(--nova-bg))]">
       <Navigation />
-      
+
       <main className="max-w-4xl mx-auto p-6 lg:p-8">
         {/* Header */}
         <motion.div
@@ -98,7 +110,7 @@ export default function SendPage() {
           className="flex items-center justify-between mb-12"
         >
           <div className="flex items-center space-x-4">
-            <Link 
+            <Link
               href="/dashboard"
               className="p-3 rounded-xl hover:bg-[rgb(var(--nova-card))] transition-colors"
             >
@@ -122,7 +134,9 @@ export default function SendPage() {
         >
           {/* Token Selection */}
           <div className="mb-8">
-            <label className="block text-lg font-medium mb-4">Select Token</label>
+            <label className="block text-lg font-medium mb-4">
+              Select Token
+            </label>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
               {tokens.map((token) => (
                 <motion.button
@@ -148,7 +162,9 @@ export default function SendPage() {
 
           {/* Recipient Address */}
           <div className="mb-8">
-            <label className="block text-lg font-medium mb-4">Recipient Address</label>
+            <label className="block text-lg font-medium mb-4">
+              Recipient Address
+            </label>
             <div className="flex space-x-4">
               <input
                 type="text"
@@ -190,7 +206,14 @@ export default function SendPage() {
             </div>
             {selectedTokenData && amount && (
               <p className="text-[rgb(var(--nova-text-dim))] mt-3">
-                ≈ ${(parseFloat(amount || '0') * parseFloat(selectedTokenData.value.replace('$', '').replace(',', '')) / parseFloat(selectedTokenData.balance)).toFixed(2)}
+                ≈ $
+                {(
+                  (parseFloat(amount || '0') *
+                    parseFloat(
+                      selectedTokenData.value.replace('$', '').replace(',', '')
+                    )) /
+                  parseFloat(selectedTokenData.balance)
+                ).toFixed(2)}
               </p>
             )}
           </div>
@@ -201,16 +224,22 @@ export default function SendPage() {
             <div className="space-y-4">
               <div className="flex justify-between text-lg">
                 <span className="text-[rgb(var(--nova-text-dim))]">Amount</span>
-                <span>{amount || '0'} {selectedToken}</span>
+                <span>
+                  {amount || '0'} {selectedToken}
+                </span>
               </div>
               <div className="flex justify-between text-lg">
-                <span className="text-[rgb(var(--nova-text-dim))]">Network Fee</span>
+                <span className="text-[rgb(var(--nova-text-dim))]">
+                  Network Fee
+                </span>
                 <span>{estimatedFee} ETH</span>
               </div>
               <div className="border-t border-[rgb(var(--nova-border))] pt-4">
                 <div className="flex justify-between font-semibold text-xl">
                   <span>Total</span>
-                  <span>{estimatedTotal} {selectedToken}</span>
+                  <span>
+                    {estimatedTotal} {selectedToken}
+                  </span>
                 </div>
               </div>
             </div>
@@ -239,10 +268,12 @@ export default function SendPage() {
           <div className="flex items-start space-x-4">
             <AlertTriangle size={24} className="text-yellow-400 mt-1" />
             <div>
-              <h4 className="font-medium text-yellow-400 mb-3 text-lg">Important Notice</h4>
+              <h4 className="font-medium text-yellow-400 mb-3 text-lg">
+                Important Notice
+              </h4>
               <p className="text-[rgb(var(--nova-text-dim))] leading-relaxed">
-                Double-check the recipient address before sending. Transactions on the blockchain 
-                are irreversible and cannot be undone.
+                Double-check the recipient address before sending. Transactions
+                on the blockchain are irreversible and cannot be undone.
               </p>
             </div>
           </div>
@@ -261,7 +292,10 @@ export default function SendPage() {
               className="nova-card p-10 rounded-3xl max-w-md w-full nova-glow"
             >
               <div className="text-center mb-8">
-                <CheckCircle size={80} className="mx-auto mb-6 text-[rgb(var(--nova-accent))]" />
+                <CheckCircle
+                  size={80}
+                  className="mx-auto mb-6 text-[rgb(var(--nova-accent))]"
+                />
                 <h3 className="text-3xl font-bold mb-4">Confirm Transaction</h3>
                 <p className="text-[rgb(var(--nova-text-dim))] text-lg">
                   Please review the details before confirming
@@ -271,14 +305,20 @@ export default function SendPage() {
               <div className="space-y-4 mb-8">
                 <div className="flex justify-between text-lg">
                   <span className="text-[rgb(var(--nova-text-dim))]">Send</span>
-                  <span className="font-semibold">{amount} {selectedToken}</span>
+                  <span className="font-semibold">
+                    {amount} {selectedToken}
+                  </span>
                 </div>
                 <div className="flex justify-between text-lg">
                   <span className="text-[rgb(var(--nova-text-dim))]">To</span>
-                  <span className="font-mono text-sm">{recipient.slice(0, 10)}...{recipient.slice(-8)}</span>
+                  <span className="font-mono text-sm">
+                    {recipient.slice(0, 10)}...{recipient.slice(-8)}
+                  </span>
                 </div>
                 <div className="flex justify-between text-lg">
-                  <span className="text-[rgb(var(--nova-text-dim))]">Network Fee</span>
+                  <span className="text-[rgb(var(--nova-text-dim))]">
+                    Network Fee
+                  </span>
                   <span>{estimatedFee} ETH</span>
                 </div>
               </div>

@@ -51,7 +51,9 @@ export default function Dashboard() {
               <p className="text-[rgb(var(--nova-text-dim))] mb-8 text-lg">
                 Please connect your wallet to access the dashboard.
               </p>
-              <WalletConnect />
+              <div className="flex flex-col items-center justify-center">
+                <WalletConnect />
+              </div>
             </motion.div>
           </div>
         </main>
@@ -91,7 +93,9 @@ export default function Dashboard() {
             </div>
           </div>
           <div className="flex items-center space-x-4 mt-6 lg:mt-0">
-            <WalletConnect />
+            <div className="flex flex-col items-center justify-center">
+              <WalletConnect />
+            </div>
             <CreateWallet />
           </div>
         </motion.div>

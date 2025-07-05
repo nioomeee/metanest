@@ -126,7 +126,7 @@ export default function Home() {
               </motion.div>
 
               <h1 className="text-6xl lg:text-8xl font-bold mb-8 leading-tight">
-                The Future of{' '}
+                The Future of <br />
                 <span className="nova-gradient-text relative">
                   Crypto Wallets
                   <motion.div
@@ -153,7 +153,9 @@ export default function Home() {
               transition={{ duration: 0.8, delay: 0.6 }}
               className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-16"
             >
-              <WalletConnect />
+              <div className="flex flex-col items-center justify-center">
+                <WalletConnect />
+              </div>
               {isConnected && (
                 <motion.button
                   initial={{ opacity: 0, scale: 0.8 }}
@@ -186,7 +188,7 @@ export default function Home() {
                   icon: TrendingUp,
                 },
                 { label: 'Active Users', value: '100+', icon: Sparkles },
-                { label: 'Supported Chains', value: '10+', icon: Globe },
+                { label: 'Total Tests', value: '10+', icon: Globe },
               ].map((stat, index) => (
                 <motion.div
                   key={index}
@@ -292,7 +294,9 @@ export default function Home() {
                 </p>
                 {!isConnected ? (
                   <div className="flex flex-col items-center justify-center">
-                    <WalletConnect />
+                    <div className="flex flex-col items-center justify-center">
+                      <WalletConnect />
+                    </div>
                   </div>
                 ) : (
                   <motion.button

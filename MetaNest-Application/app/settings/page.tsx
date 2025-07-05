@@ -69,7 +69,9 @@ export default function SettingsPage() {
               <p className="text-[rgb(var(--nova-text-dim))] mb-8 text-lg">
                 Please connect your wallet to access settings.
               </p>
-              <WalletConnect />
+              <div className="flex flex-col items-center justify-center">
+                <WalletConnect />
+              </div>
             </motion.div>
           </div>
         </main>
