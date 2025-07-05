@@ -4,7 +4,12 @@
   "description": "> A human-first crypto wallet built to make Web3 feel as easy as GPay.   > Intuitive. Cross-chain. Minimal. Gas-optimized. Made for *real* people.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "npx hardhat test",
+    "compile": "npx hardhat compile",
+    "deploy": "npx hardhat run scripts/deploy.js --network localhost",
+    "node": "npx hardhat node",
+    "start-local": "node scripts/start-local.js",
+    "clean": "npx hardhat clean"
   },
   "repository": {
     "type": "git",

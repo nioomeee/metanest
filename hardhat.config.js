@@ -1,18 +1,38 @@
-require("@nomicfoundation/hardhat-toolbox");
-require("@openzeppelin/hardhat-upgrades");
+require('@nomicfoundation/hardhat-toolbox');
+require('dotenv').config();
 
+/** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
-  solidity: "0.8.20",
-  paths: {
-    artifacts: "./artifacts",
-    cache: "./cache",
-    sources: "./contracts",
-    tests: "./test",
+  solidity: {
+    version: '0.8.20',
+    settings: {
+      optimizer: {
+        enabled: true,
+        runs: 200,
+      },
+    },
   },
   networks: {
-    mumbai: {
-      url: process.env.MUMBAI_RPC,
-      accounts: [process.env.PRIVATE_KEY]
-    }
-  }
+    hardhat: {
+      chainId: 31337,
+      accounts: {
+        mnemonic: 'test test test test test test test test test test test junk',
+        count: 20,
+        accountsBalance: '10000000000000000000000', // 10,000 ETH
+      },
+    },
+    localhost: {
+      url: 'http://127.0.0.1:8545',
+      chainId: 31337,
+    },
+  },
+  paths: {
+    sources: './contracts',
+    tests: './test',
+    cache: './cache',
+    artifacts: './artifacts',
+  },
+  mocha: {
+    timeout: 40000,
+  },
 };

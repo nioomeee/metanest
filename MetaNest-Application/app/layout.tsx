@@ -10,6 +10,9 @@ export const metadata: Metadata = {
   title: 'Metanest - Next-Gen Crypto Wallet',
   description:
     'A futuristic multi-chain crypto wallet for the decentralized future',
+  icons: {
+    icon: '/favicon.ico',
+  },
 };
 
 export default function RootLayout({

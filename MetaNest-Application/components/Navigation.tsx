@@ -12,6 +12,7 @@ import {
   Menu,
   X,
   Zap,
+  TestTube,
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -22,6 +23,7 @@ const navItems = [
   { href: '/send', label: 'Send', icon: Send },
   { href: '/history', label: 'History', icon: History },
   { href: '/settings', label: 'Settings', icon: Settings },
+  { href: '/demo', label: 'Blockchain Demo', icon: TestTube },
 ];
 
 export function Navigation() {

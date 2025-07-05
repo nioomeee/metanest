@@ -2,6 +2,8 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { ethers } from 'ethers';
+import { blockchainService } from '../lib/blockchain';
+import { TOKENS } from '../lib/contracts';
 
 export interface Token {
   symbol: string;
@@ -60,7 +62,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (window.ethereum && isConnected) {
-      const ethProvider = new ethers.BrowserProvider(window.ethereum);
+      const ethProvider = new ethers.BrowserProvider(window.ethereum as any);
       setProvider(ethProvider);
       ethProvider
         .send('eth_requestAccounts', [])
@@ -77,7 +79,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   const connectWallet = async () => {
     if (window.ethereum) {
       try {
-        const ethProvider = new ethers.BrowserProvider(window.ethereum);
+        const ethProvider = new ethers.BrowserProvider(window.ethereum as any);
         const accounts = await ethProvider.send('eth_requestAccounts', []);
         if (accounts.length > 0) {
           setIsConnected(true);

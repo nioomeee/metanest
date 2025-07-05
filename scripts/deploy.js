@@ -1,117 +1,150 @@
-const { expect } = require("chai");
-const { ethers } = require("hardhat");
+const { ethers } = require('hardhat');
 
-describe("MetaNestWallet", function () {
-  let MetaNestWallet;
-  let wallet;
-  let owner;
-  let user1;
-  let user2;
-  let mockERC20;
+async function main() {
+  console.log('🚀 Starting MetaNest deployment...');
 
-  before(async function () {
-    [owner, user1, user2] = await ethers.getSigners();
+  // Get signers
+  const [deployer, user1, user2, user3] = await ethers.getSigners();
 
-    // Deploy mock ERC20 token
-    const MockERC20 = await ethers.getContractFactory("MockERC20");
-    mockERC20 = await MockERC20.deploy("Test Token", "TEST", ethers.parseEther("1000"));
-    await mockERC20.waitForDeployment();
+  console.log('📋 Deploying contracts with address:', deployer.address);
+  console.log(
+    '💰 Deployer balance:',
+    ethers.formatEther(await ethers.provider.getBalance(deployer.address)),
+    'ETH'
+  );
 
-    // Deploy MetaNestWallet
-    MetaNestWallet = await ethers.getContractFactory("MetaNestWallet");
-    wallet = await MetaNestWallet.deploy();
-    await wallet.waitForDeployment();
+  // Deploy MockERC20 tokens
+  console.log('\n🪙 Deploying test tokens...');
 
-    // Transfer some tokens to user1 for testing
-    await mockERC20.transfer(user1.address, ethers.parseEther("100"));
+  const MockERC20 = await ethers.getContractFactory('MockERC20');
+
+  // Deploy USDC-like token
+  const usdcToken = await MockERC20.deploy(
+    'USD Coin',
+    'USDC',
+    ethers.parseEther('1000000') // 1M USDC
+  );
+  await usdcToken.waitForDeployment();
+  console.log('✅ USDC deployed to:', usdcToken.target);
+
+  // Deploy DAI-like token
+  const daiToken = await MockERC20.deploy(
+    'Dai Stablecoin',
+    'DAI',
+    ethers.parseEther('1000000') // 1M DAI
+  );
+  await daiToken.waitForDeployment();
+  console.log('✅ DAI deployed to:', daiToken.target);
+
+  // Deploy MetaNestWallet
+  console.log('\n👛 Deploying MetaNestWallet...');
+  const MetaNestWallet = await ethers.getContractFactory('MetaNestWallet');
+  const wallet = await MetaNestWallet.deploy();
+  await wallet.waitForDeployment();
+  console.log('✅ MetaNestWallet deployed to:', wallet.target);
+
+  // Setup test wallets with initial balances
+  console.log('\n🎁 Setting up test wallets...');
+
+  // Transfer tokens to test users
+  const initialBalance = ethers.parseEther('10000'); // 10k tokens each
+
+  await usdcToken.transfer(user1.address, initialBalance);
+  await usdcToken.transfer(user2.address, initialBalance);
+  await usdcToken.transfer(user3.address, initialBalance);
+
+  await daiToken.transfer(user1.address, initialBalance);
+  await daiToken.transfer(user2.address, initialBalance);
+  await daiToken.transfer(user3.address, initialBalance);
+
+  // Send some ETH to test users
+  const ethAmount = ethers.parseEther('10'); // 10 ETH each
+  await deployer.sendTransaction({
+    to: user1.address,
+    value: ethAmount,
+  });
+  await deployer.sendTransaction({
+    to: user2.address,
+    value: ethAmount,
+  });
+  await deployer.sendTransaction({
+    to: user3.address,
+    value: ethAmount,
   });
 
-  describe("Token Send Functionality", function () {
-    it("Should send tokens with memo", async function () {
-      const amount = ethers.parseEther("10");
-      const memo = "Test transfer";
+  console.log('✅ Test wallets funded:');
+  console.log(
+    `   User 1 (${user1.address}): ${ethers.formatEther(
+      initialBalance
+    )} USDC, ${ethers.formatEther(initialBalance)} DAI, ${ethers.formatEther(
+      ethAmount
+    )} ETH`
+  );
+  console.log(
+    `   User 2 (${user2.address}): ${ethers.formatEther(
+      initialBalance
+    )} USDC, ${ethers.formatEther(initialBalance)} DAI, ${ethers.formatEther(
+      ethAmount
+    )} ETH`
+  );
+  console.log(
+    `   User 3 (${user3.address}): ${ethers.formatEther(
+      initialBalance
+    )} USDC, ${ethers.formatEther(initialBalance)} DAI, ${ethers.formatEther(
+      ethAmount
+    )} ETH`
+  );
 
-      // Approve wallet to spend tokens
-      await mockERC20.connect(user1).approve(wallet.target, amount);
+  // Add some test contacts
+  console.log('\n👥 Setting up test contacts...');
 
-      // Send tokens
-      await expect(wallet.connect(user1).sendToken(mockERC20.target, user2.address, amount, memo))
-        .to.emit(wallet, "TokenSent")
-        .withArgs(user1.address, user2.address, mockERC20.target, amount, memo);
+  // User1 adds User2 and User3 as contacts
+  await wallet.connect(user1).addContact(user2.address, 'Alice');
+  await wallet.connect(user1).addContact(user3.address, 'Bob');
 
-      // Check token balance
-      expect(await mockERC20.balanceOf(user2.address)).to.equal(amount);
-    });
+  // User2 adds User1 and User3 as contacts
+  await wallet.connect(user2).addContact(user1.address, 'Charlie');
+  await wallet.connect(user2).addContact(user3.address, 'David');
 
-    it("Should revert when contract is paused", async function () {
-      await wallet.connect(owner).togglePause();
-      
-      const amount = ethers.parseEther("10");
-      const memo = "Test transfer";
-      await mockERC20.connect(user1).approve(wallet.target, amount);
+  // User3 adds User1 and User2 as contacts
+  await wallet.connect(user3).addContact(user1.address, 'Eve');
+  await wallet.connect(user3).addContact(user2.address, 'Frank');
 
-      await expect(wallet.connect(user1).sendToken(mockERC20.target, user2.address, amount, memo))
-        .to.be.revertedWithCustomError(wallet, "EnforcedPause");
+  console.log('✅ Test contacts added');
 
-      // Unpause for other tests
-      await wallet.connect(owner).togglePause();
-    });
+  // Create deployment info
+  const deploymentInfo = {
+    network: 'localhost',
+    chainId: 31337,
+    contracts: {
+      metaNestWallet: wallet.target,
+      usdcToken: usdcToken.target,
+      daiToken: daiToken.target,
+    },
+    testAccounts: {
+      deployer: deployer.address,
+      user1: user1.address,
+      user2: user2.address,
+      user3: user3.address,
+    },
+    deploymentTime: new Date().toISOString(),
+  };
+
+  console.log('\n Deployment Summary:');
+  console.log(JSON.stringify(deploymentInfo, null, 2));
+
+  console.log('\n🎉 MetaNest deployment completed successfully!');
+  console.log('\n📝 Next steps:');
+  console.log('1. Start local node: npx hardhat node');
+  console.log('2. Update frontend with contract addresses');
+  console.log(
+    '3. Test the application with MetaMask connected to localhost:8545'
+  );
+}
+
+main()
+  .then(() => process.exit(0))
+  .catch((error) => {
+    console.error('❌ Deployment failed:', error);
+    process.exit(1);
   });
-
-  describe("Contact Management", function () {
-    it("Should add, update, and delete contacts", async function () {
-      // Add contact
-      await expect(wallet.connect(user1).addContact(user2.address, "Test Contact"))
-        .to.emit(wallet, "ContactAdded")
-        .withArgs(user1.address, user2.address, "Test Contact");
-
-      // Verify contact
-      expect(await wallet.getContact(user1.address, user2.address)).to.equal("Test Contact");
-
-      // Update contact
-      await expect(wallet.connect(user1).updateContact(user2.address, "Updated Contact"))
-        .to.emit(wallet, "ContactUpdated")
-        .withArgs(user1.address, user2.address, "Updated Contact");
-
-      // Verify update
-      expect(await wallet.getContact(user1.address, user2.address)).to.equal("Updated Contact");
-
-      // Delete contact
-      await expect(wallet.connect(user1).deleteContact(user2.address))
-        .to.emit(wallet, "ContactDeleted")
-        .withArgs(user1.address, user2.address);
-
-      // Verify deletion
-      expect(await wallet.getContact(user1.address, user2.address)).to.equal("");
-    });
-  });
-
-  describe("Transaction History", function () {
-    it("Should maintain last 5 transactions", async function () {
-      const amount = ethers.parseEther("1");
-      await mockERC20.connect(user1).approve(wallet.target, amount.mul(6));
-
-      // Make 6 transactions
-      for (let i = 0; i < 6; i++) {
-        await wallet.connect(user1).sendToken(mockERC20.target, user2.address, amount, `Tx ${i}`);
-      }
-
-      // Get recent transactions
-      const txs = await wallet.getRecentTransactions(user1.address);
-      
-      // Should only keep last 5
-      expect(txs.length).to.equal(5);
-      
-      // Oldest transaction (Tx 0) should be overwritten
-      expect(txs[0].amount).to.equal(amount);
-      expect(txs[0].memo).to.equal("Tx 1"); // First tx should now be the second one
-    });
-  });
-
-  describe("Admin Functions", function () {
-    it("Should only allow owner to pause", async function () {
-      await expect(wallet.connect(user1).togglePause())
-        .to.be.revertedWith("Ownable: caller is not the owner");
-    });
-  });
-});

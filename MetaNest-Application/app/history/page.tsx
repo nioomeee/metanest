@@ -1,16 +1,16 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { 
-  ArrowLeft, 
-  ArrowUpRight, 
+import {
+  ArrowLeft,
+  ArrowUpRight,
   ArrowDownLeft,
   ExternalLink,
   Filter,
   Search,
   Clock,
   CheckCircle,
-  XCircle
+  XCircle,
 } from 'lucide-react';
 import { Navigation } from '@/components/Navigation';
 import { useWallet } from '@/contexts/WalletContext';
@@ -24,14 +24,16 @@ export default function HistoryPage() {
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
 
-  const filteredTransactions = transactions.filter(tx => {
-    const matchesFilter = filter === 'all' || tx.type === filter || tx.status === filter;
-    const matchesSearch = search === '' || 
+  const filteredTransactions = transactions.filter((tx) => {
+    const matchesFilter =
+      filter === 'all' || tx.type === filter || tx.status === filter;
+    const matchesSearch =
+      search === '' ||
       tx.token.toLowerCase().includes(search.toLowerCase()) ||
       tx.hash.toLowerCase().includes(search.toLowerCase()) ||
       tx.to.toLowerCase().includes(search.toLowerCase()) ||
       tx.from.toLowerCase().includes(search.toLowerCase());
-    
+
     return matchesFilter && matchesSearch;
   });
 
@@ -72,12 +74,17 @@ export default function HistoryPage() {
               animate={{ opacity: 1, y: 0 }}
               className="nova-card p-12 rounded-3xl nova-glow"
             >
-              <Clock size={80} className="mx-auto mb-8 text-[rgb(var(--nova-accent))]" />
+              <Clock
+                size={80}
+                className="mx-auto mb-8 text-[rgb(var(--nova-accent))]"
+              />
               <h2 className="text-3xl font-bold mb-6">Connect Your Wallet</h2>
               <p className="text-[rgb(var(--nova-text-dim))] mb-8 text-lg">
                 Please connect your wallet to view transaction history.
               </p>
-              <WalletConnect />
+              <div className="flex flex-col items-center justify-center">
+                <WalletConnect />
+              </div>
             </motion.div>
           </div>
         </main>
@@ -88,7 +95,7 @@ export default function HistoryPage() {
   return (
     <div className="min-h-screen bg-[rgb(var(--nova-bg))]">
       <Navigation />
-      
+
       <main className="max-w-7xl mx-auto p-6 lg:p-8">
         {/* Header */}
         <motion.div
@@ -97,7 +104,7 @@ export default function HistoryPage() {
           className="flex items-center justify-between mb-12"
         >
           <div className="flex items-center space-x-4">
-            <Link 
+            <Link
               href="/dashboard"
               className="p-3 rounded-xl hover:bg-[rgb(var(--nova-card))] transition-colors"
             >
@@ -122,7 +129,10 @@ export default function HistoryPage() {
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-6 lg:space-y-0">
             {/* Search */}
             <div className="relative flex-1 lg:max-w-md">
-              <Search size={20} className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[rgb(var(--nova-text-dim))]" />
+              <Search
+                size={20}
+                className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[rgb(var(--nova-text-dim))]"
+              />
               <input
                 type="text"
                 value={search}
@@ -141,7 +151,7 @@ export default function HistoryPage() {
                   { value: 'send', label: 'Sent' },
                   { value: 'receive', label: 'Received' },
                   { value: 'pending', label: 'Pending' },
-                  { value: 'confirmed', label: 'Confirmed' }
+                  { value: 'confirmed', label: 'Confirmed' },
                 ].map((option) => (
                   <button
                     key={option.value}
@@ -168,13 +178,17 @@ export default function HistoryPage() {
               animate={{ opacity: 1, y: 0 }}
               className="nova-card p-16 rounded-3xl text-center"
             >
-              <Clock size={64} className="mx-auto mb-6 text-[rgb(var(--nova-text-dim))]" />
-              <h3 className="text-2xl font-semibold mb-4">No transactions found</h3>
+              <Clock
+                size={64}
+                className="mx-auto mb-6 text-[rgb(var(--nova-text-dim))]"
+              />
+              <h3 className="text-2xl font-semibold mb-4">
+                No transactions found
+              </h3>
               <p className="text-[rgb(var(--nova-text-dim))] text-lg">
-                {search || filter !== 'all' 
-                  ? 'Try adjusting your search or filters' 
-                  : 'Your transactions will appear here'
-                }
+                {search || filter !== 'all'
+                  ? 'Try adjusting your search or filters'
+                  : 'Your transactions will appear here'}
               </p>
             </motion.div>
           ) : (
@@ -189,11 +203,13 @@ export default function HistoryPage() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-6 flex-1">
                     {/* Transaction Type Icon */}
-                    <div className={`p-4 rounded-2xl ${
-                      tx.type === 'send' 
-                        ? 'bg-red-400/20 text-red-400' 
-                        : 'bg-green-400/20 text-green-400'
-                    }`}>
+                    <div
+                      className={`p-4 rounded-2xl ${
+                        tx.type === 'send'
+                          ? 'bg-red-400/20 text-red-400'
+                          : 'bg-green-400/20 text-green-400'
+                      }`}
+                    >
                       {tx.type === 'send' ? (
                         <ArrowUpRight size={24} />
                       ) : (
@@ -207,20 +223,28 @@ export default function HistoryPage() {
                         <h3 className="font-semibold text-xl">
                           {tx.type === 'send' ? 'Sent' : 'Received'} {tx.token}
                         </h3>
-                        <div className={`px-3 py-1 rounded-full text-sm flex items-center space-x-2 ${getStatusColor(tx.status)}`}>
+                        <div
+                          className={`px-3 py-1 rounded-full text-sm flex items-center space-x-2 ${getStatusColor(
+                            tx.status
+                          )}`}
+                        >
                           {getStatusIcon(tx.status)}
                           <span className="capitalize">{tx.status}</span>
                         </div>
                       </div>
-                      
+
                       <div className="flex flex-col lg:flex-row lg:items-center lg:space-x-8 text-[rgb(var(--nova-text-dim))]">
                         <div>
                           <span className="inline-block w-8">To:</span>
-                          <span className="font-mono">{tx.to.slice(0, 10)}...{tx.to.slice(-8)}</span>
+                          <span className="font-mono">
+                            {tx.to.slice(0, 10)}...{tx.to.slice(-8)}
+                          </span>
                         </div>
                         <div>
                           <span className="inline-block w-16">Hash:</span>
-                          <span className="font-mono">{tx.hash.slice(0, 10)}...{tx.hash.slice(-8)}</span>
+                          <span className="font-mono">
+                            {tx.hash.slice(0, 10)}...{tx.hash.slice(-8)}
+                          </span>
                         </div>
                         <div>
                           <span className="inline-block w-8">Fee:</span>
@@ -232,10 +256,13 @@ export default function HistoryPage() {
 
                   {/* Amount and Time */}
                   <div className="text-right">
-                    <div className={`text-2xl font-bold mb-2 ${
-                      tx.type === 'send' ? 'text-red-400' : 'text-green-400'
-                    }`}>
-                      {tx.type === 'send' ? '-' : '+'}{tx.amount} {tx.token}
+                    <div
+                      className={`text-2xl font-bold mb-2 ${
+                        tx.type === 'send' ? 'text-red-400' : 'text-green-400'
+                      }`}
+                    >
+                      {tx.type === 'send' ? '-' : '+'}
+                      {tx.amount} {tx.token}
                     </div>
                     <div className="text-[rgb(var(--nova-text-dim))] mb-2">
                       {format(tx.timestamp, 'MMM d, yyyy')}
@@ -247,7 +274,10 @@ export default function HistoryPage() {
 
                   {/* External Link */}
                   <button className="ml-6 p-3 rounded-xl hover:bg-[rgb(var(--nova-card))] transition-colors opacity-0 group-hover:opacity-100">
-                    <ExternalLink size={20} className="text-[rgb(var(--nova-text-dim))]" />
+                    <ExternalLink
+                      size={20}
+                      className="text-[rgb(var(--nova-text-dim))]"
+                    />
                   </button>
                 </div>
               </motion.div>
