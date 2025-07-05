@@ -9,14 +9,14 @@ describe("MetaNestWallet", function () {
   let mockERC20;
 
   before(async function () {
-    [owner, user1, user2] = await ethers.getSigners();
+    [owner, user1, user2, trustedForwarder] = await ethers.getSigners();
 
     const MockERC20 = await ethers.getContractFactory("MockERC20");
     mockERC20 = await MockERC20.deploy("Test Token", "TEST", ethers.parseEther("1000"));
     await mockERC20.waitForDeployment();
 
     const MetaNestWallet = await ethers.getContractFactory("MetaNestWallet");
-    wallet = await MetaNestWallet.deploy();
+    wallet = await MetaNestWallet.deploy(owner.address, trustedForwarder.address);
     await wallet.waitForDeployment();
 
     await mockERC20.transfer(user1.address, ethers.parseEther("100"));
@@ -29,9 +29,11 @@ describe("MetaNestWallet", function () {
     });
 
     it("Should not allow non-owners to toggle pause", async function () {
-      await expect(wallet.connect(user1).togglePause())
-        .to.be.revertedWith("Ownable: caller is not the owner");
+    await expect(wallet.connect(user1).togglePause())
+        .to.be.revertedWithCustomError(wallet, "OwnableUnauthorizedAccount");
     });
+
+
   });
 
   describe("Pausable", function () {
@@ -51,15 +53,14 @@ describe("MetaNestWallet", function () {
     });
 
     it("Should prevent token transfers when paused", async function () {
-      await wallet.connect(owner).togglePause();
+    await wallet.connect(owner).togglePause();
+    const amount = ethers.parseEther("10");
+    const memo = "Test transfer";
+    await mockERC20.connect(user1).approve(wallet.target, amount);
 
-      const amount = ethers.parseEther("10");
-      const memo = "Test transfer";
-      await mockERC20.connect(user1).approve(wallet.target, amount);
-
-      await expect(wallet.connect(user1).sendToken(mockERC20.target, user2.address, amount, memo))
-        .to.be.revertedWith("Pausable: paused");
-    });
+    await expect(wallet.connect(user1).sendToken(mockERC20.target, user2.address, amount, memo))
+        .to.be.revertedWithCustomError(wallet, "EnforcedPause");
+});
   });
 
   describe("Token Transfer Functionality", function () {
@@ -115,13 +116,14 @@ describe("MetaNestWallet", function () {
     });
 
     it("Should revert when transfer fails", async function () {
-      const amount = ethers.parseEther("1000");
-      const memo = "Test transfer";
-      await mockERC20.connect(user1).approve(wallet.target, amount);
+    const amount = ethers.parseEther("1000");
+    const memo = "Test transfer";
+    await mockERC20.connect(user1).approve(wallet.target, amount);
 
-      await expect(wallet.connect(user1).sendToken(mockERC20.target, user2.address, amount, memo))
-        .to.be.revertedWithCustomError(wallet, "TransferFailed");
-    });
+    await expect(
+        wallet.connect(user1).sendToken(mockERC20.target, user2.address, amount, memo)
+    ).to.be.revertedWithCustomError(wallet, "TransferFailed");
+});
   });
 
   describe("Contact Management", function () {
@@ -138,7 +140,7 @@ describe("MetaNestWallet", function () {
       const amount = ethers.parseEther("1");
 
       const MetaNestWallet = await ethers.getContractFactory("MetaNestWallet");
-      const freshWallet = await MetaNestWallet.deploy();
+      const freshWallet = await MetaNestWallet.deploy(owner.address, trustedForwarder.address);
       await freshWallet.waitForDeployment();
 
       await mockERC20.connect(user1).approve(freshWallet.target, amount * 5n);
@@ -165,37 +167,38 @@ describe("MetaNestWallet", function () {
     });
 
     it("Should keep transaction history separate between users", async function () {
-      const amount = ethers.parseEther("1");
+    const amount = ethers.parseEther("1");
     
-      // Deploy fresh wallet for clean slate
-      const MetaNestWallet = await ethers.getContractFactory("MetaNestWallet");
-      const isolatedWallet = await MetaNestWallet.deploy();
-      await isolatedWallet.waitForDeployment();
+    const MetaNestWallet = await ethers.getContractFactory("MetaNestWallet");
+    const isolatedWallet = await MetaNestWallet.deploy(owner.address, trustedForwarder.address);
+    await isolatedWallet.waitForDeployment();
     
-      // Fund users
-      await mockERC20.transfer(user1.address, amount);
-      await mockERC20.transfer(user2.address, amount);
+    // Fund users
+    await mockERC20.transfer(user1.address, amount);
+    await mockERC20.transfer(user2.address, amount);
     
-      // Approvals
-      await mockERC20.connect(user1).approve(isolatedWallet.target, amount);
-      await mockERC20.connect(user2).approve(isolatedWallet.target, amount);
+    // Approvals
+    await mockERC20.connect(user1).approve(isolatedWallet.target, amount);
+    await mockERC20.connect(user2).approve(isolatedWallet.target, amount);
     
-      // Send distinct txs
-      await isolatedWallet.connect(user1).sendToken(mockERC20.target, user2.address, amount, "User1 Tx");
-      await isolatedWallet.connect(user2).sendToken(mockERC20.target, user1.address, amount, "User2 Tx");
+    // Send txs (2 per user)
+    await isolatedWallet.connect(user1).sendToken(mockERC20.target, user2.address, amount/2n, "User1 Tx1");
+    await isolatedWallet.connect(user1).sendToken(mockERC20.target, user2.address, amount/2n, "User1 Tx2");
+    await isolatedWallet.connect(user2).sendToken(mockERC20.target, user1.address, amount/2n, "User2 Tx1");
+    await isolatedWallet.connect(user2).sendToken(mockERC20.target, user1.address, amount/2n, "User2 Tx2");
     
-      const user1Txs = await isolatedWallet.getRecentTransactions(user1.address);
-      const user2Txs = await isolatedWallet.getRecentTransactions(user2.address);
+    const user1Txs = await isolatedWallet.getRecentTransactions(user1.address);
+    const user2Txs = await isolatedWallet.getRecentTransactions(user2.address);
     
-      expect(user1Txs.length).to.equal(2); // fixed
-      expect(user2Txs.length).to.equal(2);
+    expect(user1Txs.length).to.equal(2);
+    expect(user2Txs.length).to.equal(2);
     });    
 
     describe("ETH Functionality", function () {
 
       beforeEach(async () => {
         const MetaNestWallet = await ethers.getContractFactory("MetaNestWallet");
-        wallet = await MetaNestWallet.deploy();
+        wallet = await MetaNestWallet.deploy(owner.address, trustedForwarder.address);
         await wallet.waitForDeployment();
       });
 
@@ -268,18 +271,16 @@ describe("MetaNestWallet", function () {
     ).to.be.revertedWithCustomError(wallet, "InsufficientBalance");
 });
 
-      it("Should prevent ETH transfers when paused", async function () {
-        const depositAmount = ethers.parseEther("1");
-        await wallet.connect(user1).depositEth({ value: depositAmount });
-  
-        await wallet.connect(owner).togglePause();
-  
-        await expect(
-          wallet.connect(user1).sendEth(user2.address, ethers.parseEther("0.1"), "test")
-        ).to.be.revertedWith("Pausable: paused");
-  
-        await wallet.connect(owner).togglePause();
-      });
+    it("Should prevent ETH transfers when paused", async function () {
+    const depositAmount = ethers.parseEther("1");
+    await wallet.connect(user1).depositEth({ value: depositAmount });
+
+    await wallet.connect(owner).togglePause();
+
+    await expect(
+        wallet.connect(user1).sendEth(user2.address, ethers.parseEther("0.1"), "test")
+    ).to.be.revertedWithCustomError(wallet, "EnforcedPause");
+    });
     });
   });
 });
