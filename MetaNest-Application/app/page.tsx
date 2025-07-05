@@ -185,8 +185,8 @@ export default function Home() {
                   value: '$2.4B+',
                   icon: TrendingUp,
                 },
-                { label: 'Active Users', value: '500K+', icon: Sparkles },
-                { label: 'Supported Chains', value: '25+', icon: Globe },
+                { label: 'Active Users', value: '100+', icon: Sparkles },
+                { label: 'Supported Chains', value: '10+', icon: Globe },
               ].map((stat, index) => (
                 <motion.div
                   key={index}
