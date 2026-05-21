@@ -1,186 +1,257 @@
-# 📚 MetaNest Documentation
+<div align="center">
 
-> Comprehensive documentation for the MetaNest crypto wallet platform
+<img src="https://img.shields.io/badge/MetaNest-Web3%20Wallet-6366f1?style=for-the-badge&logo=ethereum&logoColor=white" alt="MetaNest" height="50"/>
 
-## 📋 Table of Contents
+# 🪺 MetaNest
 
-1. [Overview](#overview)
-2. [Architecture](#architecture)
-3. [Smart Contracts](#smart-contracts)
-4. [Frontend Application](#frontend-application)
-5. [API Reference](#api-reference)
-6. [Development Guide](#development-guide)
-7. [Deployment](#deployment)
-8. [Testing](#testing)
-9. [Troubleshooting](#troubleshooting)
+### *Human-first crypto wallet. Web3, made for everyone.*
+
+> A full-stack Web3 wallet platform with smart contract infrastructure, multi-token support,
+> contact management, and a polished Next.js frontend — built to remove the friction from decentralized finance.
+
+<br/>
+
+[![Solidity](https://img.shields.io/badge/Solidity-0.8.x-363636?style=flat-square&logo=solidity&logoColor=white)](https://soliditylang.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-13-000000?style=flat-square&logo=nextdotjs&logoColor=white)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Hardhat](https://img.shields.io/badge/Hardhat-Latest-F7DF1E?style=flat-square&logo=ethereum&logoColor=black)](https://hardhat.org/)
+[![Ethers.js](https://img.shields.io/badge/Ethers.js-v6-2535A0?style=flat-square&logo=ethereum&logoColor=white)](https://ethers.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=flat-square&logo=docker&logoColor=white)](https://www.docker.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-22c55e?style=flat-square)](LICENSE)
+
+<br/>
+
+[🚀 Quick Start](#-quick-start) · [🏗️ Architecture](#%EF%B8%8F-architecture) · [📜 Smart Contracts](#-smart-contracts) · [🌐 Frontend](#-frontend-application) · [🧪 Testing](#-testing) · [🐛 Troubleshooting](#-troubleshooting)
 
 ---
 
-## 🎯 Overview
+</div>
 
-MetaNest is a human-first crypto wallet built to make Web3 accessible to everyone. This documentation provides comprehensive technical details for developers, contributors, and users.
+## 🌟 What is MetaNest?
 
-### Key Features
+MetaNest is a **production-grade Web3 crypto wallet** that bridges the gap between complex blockchain infrastructure and everyday users. It combines a battle-tested Solidity smart contract with a sleek Next.js frontend, letting users send ETH and ERC20 tokens, manage contacts, and track transaction history — all with the simplicity of a traditional fintech app.
 
-- **Multi-token Support**: ETH, ERC20 tokens (USDC, DAI)
-- **Contact Management**: Save and organize frequently used addresses
-- **Transaction History**: Detailed records with memo support
-- **Enhanced Security**: Pausable contracts with owner controls
-- **Gas Optimization**: Efficient smart contract design
-- **Cross-Platform**: Web, mobile-ready, Docker support
+**Why MetaNest?**
+- 🔐 **Secure by design** — Pausable contracts with owner controls baked in
+- 👛 **Multi-asset** — ETH, USDC, DAI, and any ERC20 token
+- 📒 **Address book** — Save contacts with human-readable names
+- 📜 **Full history** — Every transfer logged on-chain with memo support
+- ⚡ **Gas optimized** — Lean contract design to minimize fees
+- 🌍 **Cross-platform** — Web, mobile-ready, Docker support
 
 ---
 
 ## 🏗️ Architecture
 
-### System Architecture
-
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Frontend      │    │   Blockchain    │    │   External      │
-│   (Next.js)     │◄──►│   (Hardhat)     │◄──►│   (MetaMask)    │
-│   Port: 3000    │    │   Port: 8545    │    │   Browser       │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
+╔══════════════════════════════════════════════════════════════════════╗
+║                        MetaNest System                              ║
+╠══════════════╦═══════════════════════╦═══════════════════════════════╣
+║              ║                       ║                               ║
+║  👤 User     ║  🌐 Frontend          ║  ⛓️  Blockchain               ║
+║              ║                       ║                               ║
+║  MetaMask ───╫──► Next.js 13         ║  Hardhat Local Node           ║
+║  Wallet      ║    Port :3000         ║  Port :8545                   ║
+║              ║                       ║                               ║
+║              ║  WalletContext.tsx ───╫──► MetaNestWallet.sol         ║
+║              ║  BlockchainService ───╫──► MockERC20.sol (USDC/DAI)  ║
+║              ║  Ethers.js v6      ───╫──► Events & State            ║
+║              ║                       ║                               ║
+╠══════════════╩═══════════════════════╩═══════════════════════════════╣
+║                                                                      ║
+║  📦 Docker Compose                                                   ║
+║  ┌─────────────────────┐   ┌─────────────────────────────────────┐  ║
+║  │  blockchain service  │   │  frontend service                   │  ║
+║  │  hardhat node        │   │  next.js app                        │  ║
+║  │  auto-deploy         │   │  reads from contracts.ts config     │  ║
+║  └─────────────────────┘   └─────────────────────────────────────┘  ║
+╚══════════════════════════════════════════════════════════════════════╝
 ```
 
 ### Technology Stack
 
-- **Frontend**: Next.js 13, TypeScript, Tailwind CSS, Radix UI
-- **Blockchain**: Solidity, Hardhat, Ethers.js v6
-- **Testing**: Mocha, Chai, Hardhat Test
-- **Deployment**: Docker, Docker Compose
-- **Development**: ESLint, Prettier, TypeScript
+| Layer | Technology | Purpose |
+|---|---|---|
+| **Smart Contracts** | Solidity + Hardhat | On-chain wallet logic |
+| **Frontend** | Next.js 13 + TypeScript | User interface |
+| **Styling** | Tailwind CSS + Radix UI | Design system |
+| **Web3 Layer** | Ethers.js v6 | Blockchain interaction |
+| **Testing** | Mocha + Chai | Contract test suite |
+| **DevOps** | Docker + Docker Compose | Container orchestration |
+| **Browser Wallet** | MetaMask | Transaction signing |
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+Make sure you have the following installed:
+
+- ![Node.js](https://img.shields.io/badge/Node.js-v18+-339933?style=flat-square&logo=nodedotjs&logoColor=white) — [Download](https://nodejs.org/)
+- ![MetaMask](https://img.shields.io/badge/MetaMask-Extension-E2761B?style=flat-square&logo=metamask&logoColor=white) — [Download](https://metamask.io/)
+- ![Git](https://img.shields.io/badge/Git-Latest-F05032?style=flat-square&logo=git&logoColor=white) — [Download](https://git-scm.com/)
+- ![Docker](https://img.shields.io/badge/Docker-Optional-2496ED?style=flat-square&logo=docker&logoColor=white) *(optional, for containerized setup)*
+
+---
+
+### ⚡ Option A — Local Development (Recommended)
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/your-username/metanest.git
+cd metanest
+
+# 2. Install root dependencies (Hardhat, contracts)
+npm install
+
+# 3. Install frontend dependencies
+cd MetaNest-Application && npm install && cd ..
+
+# 4. Start the Hardhat local blockchain AND deploy contracts
+npm run start-local
+```
+
+Open a **second terminal**:
+
+```bash
+# 5. Start the Next.js frontend
+cd MetaNest-Application
+npm run dev
+```
+
+🎉 **Done!** Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+---
+
+### 🐳 Option B — Docker (One Command)
+
+```bash
+# Start everything (blockchain + frontend)
+npm run docker:start
+
+# Check running services
+docker-compose ps
+
+# Tail logs
+npm run docker:logs
+
+# Tear down
+npm run docker:stop
+```
+
+---
+
+### 🦊 Configure MetaMask
+
+After the local node is running, connect MetaMask to it:
+
+| Setting | Value |
+|---|---|
+| Network Name | `MetaNest Local` |
+| RPC URL | `http://127.0.0.1:8545` |
+| Chain ID | `31337` |
+| Currency Symbol | `ETH` |
+
+> 💡 **Tip:** Copy a private key from the Hardhat terminal output and import it into MetaMask to get a pre-funded test account.
 
 ---
 
 ## 📜 Smart Contracts
 
+### Contract Addresses *(local network)*
+
+| Contract | Address |
+|---|---|
+| `MetaNestWallet` | `0x9A676e781A523b5d0C0e43731313A708CB607508` |
+| `USDC (MockERC20)` | `0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0` |
+| `DAI (MockERC20)` | `0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82` |
+
+---
+
 ### MetaNestWallet.sol
 
-The core wallet contract that handles all wallet operations.
+The core contract that powers all wallet operations.
 
-#### Contract Address
-
-```solidity
-// Deployed on local network (Chain ID: 31337)
-MetaNestWallet: 0x9A676e781A523b5d0C0e43731313A708CB607508
-```
-
-#### Key Functions
-
-##### Token Operations
+<details>
+<summary><strong>💸 Token Operations</strong></summary>
 
 ```solidity
-// Send ETH to another address
-function sendEth(
-    address to,
-    uint256 amount,
-    string calldata memo
-) external payable
+// Send ETH with an optional memo
+function sendEth(address to, uint256 amount, string calldata memo) external payable
 
-// Send ERC20 tokens
-function sendToken(
-    address token,
-    address to,
-    uint256 amount,
-    string calldata memo
-) external
+// Send any ERC20 token
+function sendToken(address token, address to, uint256 amount, string calldata memo) external
 
-// Get ETH balance
-function getEthBalance(address user) external view returns (uint256)
-
-// Deposit ETH into wallet
+// Deposit ETH into the wallet
 function depositEth() external payable
 
-// Withdraw ETH from wallet
+// Withdraw ETH from the wallet
 function withdrawEth(uint256 amount) external
+
+// Read ETH balance for any user
+function getEthBalance(address user) external view returns (uint256)
 ```
 
-##### Contact Management
+</details>
+
+<details>
+<summary><strong>📒 Contact Management</strong></summary>
 
 ```solidity
-// Add a new contact
 function addContact(address contactAddress, string calldata name) external
-
-// Update existing contact
 function updateContact(address contactAddress, string calldata name) external
-
-// Delete contact
 function deleteContact(address contactAddress) external
-
-// Get contact name
 function getContact(address user, address contactAddress) external view returns (string memory)
 ```
 
-##### Transaction History
+</details>
+
+<details>
+<summary><strong>📜 Transaction History</strong></summary>
 
 ```solidity
-// Get recent transactions (last 5)
+// Returns the last 5 transactions for a user
 function getRecentTransactions(address user) external view returns (Transaction[] memory)
 
-// Transaction struct
 struct Transaction {
-    address token;      // Token address (0x0 for ETH)
-    address to;         // Recipient address
-    uint256 amount;     // Transaction amount
+    address token;      // ERC20 address, or 0x0 for ETH
+    address to;         // Recipient
+    uint256 amount;     // Amount sent
     uint256 timestamp;  // Block timestamp
 }
 ```
 
-##### Security Functions
+</details>
+
+<details>
+<summary><strong>🔒 Security</strong></summary>
 
 ```solidity
-// Pause/unpause contract (owner only)
+// Emergency pause — owner only
 function togglePause() external onlyOwner
 
-// Check if contract is paused
+// Check if contract is active
 function paused() external view returns (bool)
 ```
 
-#### Events
+</details>
+
+<details>
+<summary><strong>📡 Events</strong></summary>
 
 ```solidity
-// Token transfer events
-event TokenSent(address indexed from, address indexed to, address indexed token, uint256 amount, string memo);
 event EthSent(address indexed from, address indexed to, uint256 amount, string memo);
-
-// Contact management events
+event TokenSent(address indexed from, address indexed to, address indexed token, uint256 amount, string memo);
 event ContactAdded(address indexed user, address indexed contactAddress, string name);
 event ContactUpdated(address indexed user, address indexed contactAddress, string name);
 event ContactDeleted(address indexed user, address indexed contactAddress);
-
-// ETH operations events
 event EthDeposited(address indexed user, uint256 amount);
 event EthWithdrawn(address indexed user, uint256 amount);
 ```
 
-### MockERC20.sol
-
-Test token contract for development and testing.
-
-#### Contract Addresses
-
-```solidity
-// USDC Token
-USDC: 0xA51c1fc2f0D1a1b8494Ed1FE312d7C3a78Ed91C0
-
-// DAI Token
-DAI: 0x0DCd1Bf9A1b36cE34237eEaFef220932846BCD82
-```
-
-#### Functions
-
-```solidity
-// Standard ERC20 functions
-function name() external view returns (string memory)
-function symbol() external view returns (string memory)
-function decimals() external view returns (uint8)
-function totalSupply() external view returns (uint256)
-function balanceOf(address account) external view returns (uint256)
-function transfer(address to, uint256 amount) external returns (bool)
-function approve(address spender, uint256 amount) external returns (bool)
-function transferFrom(address from, address to, uint256 amount) external returns (bool)
-```
+</details>
 
 ---
 
@@ -190,305 +261,131 @@ function transferFrom(address from, address to, uint256 amount) external returns
 
 ```
 MetaNest-Application/
-├── app/                    # Next.js app directory
-│   ├── dashboard/         # Main wallet dashboard
-│   ├── send/             # Send transaction page
-│   ├── history/          # Transaction history
-│   ├── settings/         # Wallet settings
-│   └── demo/             # Blockchain demo page
-├── components/            # React components
-│   ├── ui/               # Reusable UI components
-│   ├── CreateWallet.tsx  # Wallet creation
-│   ├── Navigation.tsx    # Navigation bar
-│   └── BlockchainDemo.tsx # Demo component
-├── contexts/             # React contexts
-│   └── WalletContext.tsx # Wallet state management
-├── lib/                  # Utilities and services
-│   ├── blockchain.ts     # Blockchain service
-│   ├── contracts.ts      # Contract configuration
-│   └── utils.ts          # Utility functions
-└── hooks/                # Custom React hooks
-    └── use-toast.ts      # Toast notifications
+├── app/
+│   ├── dashboard/          # 🏠 Main wallet view
+│   ├── send/               # 💸 Send ETH / tokens
+│   ├── history/            # 📜 Transaction log
+│   ├── settings/           # ⚙️  Wallet settings
+│   └── demo/               # 🧪 Blockchain demo
+│
+├── components/
+│   ├── ui/                 # Reusable UI primitives (Radix)
+│   ├── CreateWallet.tsx    # Wallet onboarding
+│   ├── Navigation.tsx      # App-wide nav bar
+│   └── BlockchainDemo.tsx  # Live demo component
+│
+├── contexts/
+│   └── WalletContext.tsx   # 🌐 Global wallet state
+│
+├── lib/
+│   ├── blockchain.ts       # BlockchainService class
+│   ├── contracts.ts        # Contract addresses & ABIs
+│   └── utils.ts            # Shared helpers
+│
+└── hooks/
+    └── use-toast.ts        # Toast notification hook
 ```
 
-### Key Components
-
-#### WalletContext.tsx
-
-Manages global wallet state and blockchain interactions.
-
-```typescript
-interface WalletContextType {
-  isConnected: boolean;
-  address: string;
-  balance: string;
-  tokens: Token[];
-  transactions: Transaction[];
-  connectWallet: () => void;
-  disconnectWallet: () => void;
-  sendTransaction: (to: string, amount: string, token: string) => Promise<void>;
-}
-```
-
-#### BlockchainService
-
-Handles all blockchain interactions.
+### BlockchainService API
 
 ```typescript
 class BlockchainService {
-  // Connect to wallet
-  async connectWallet(): Promise<string>;
-
-  // Get balances
-  async getEthBalance(address: string): Promise<string>;
-  async getTokenBalance(
-    tokenAddress: string,
-    userAddress: string
-  ): Promise<string>;
-
-  // Send transactions
-  async sendEth(
-    to: string,
-    amount: string,
-    memo: string
-  ): Promise<ContractTransactionResponse>;
-  async sendToken(
-    tokenAddress: string,
-    to: string,
-    amount: string,
-    memo: string
-  ): Promise<ContractTransactionResponse>;
-
-  // Contact management
-  async addContact(
-    contactAddress: string,
-    name: string
-  ): Promise<ContractTransactionResponse>;
-  async updateContact(
-    contactAddress: string,
-    name: string
-  ): Promise<ContractTransactionResponse>;
-  async deleteContact(
-    contactAddress: string
-  ): Promise<ContractTransactionResponse>;
-
-  // Transaction history
-  async getRecentTransactions(userAddress: string): Promise<any[]>;
+  connectWallet(): Promise<string>
+  getEthBalance(address: string): Promise<string>
+  getTokenBalance(tokenAddress: string, userAddress: string): Promise<string>
+  sendEth(to: string, amount: string, memo: string): Promise<ContractTransactionResponse>
+  sendToken(tokenAddress: string, to: string, amount: string, memo: string): Promise<ContractTransactionResponse>
+  addContact(contactAddress: string, name: string): Promise<ContractTransactionResponse>
+  updateContact(contactAddress: string, name: string): Promise<ContractTransactionResponse>
+  deleteContact(contactAddress: string): Promise<ContractTransactionResponse>
+  getRecentTransactions(userAddress: string): Promise<Transaction[]>
 }
 ```
 
 ---
 
-## 🔌 API Reference
+## 🛠️ Available Scripts
 
-### Contract ABIs
+### Blockchain (root)
 
-#### MetaNestWallet ABI
+| Command | Description |
+|---|---|
+| `npm run compile` | Compile Solidity contracts |
+| `npm run test` | Run full contract test suite |
+| `npm run node` | Start Hardhat node only |
+| `npm run deploy` | Deploy contracts to localhost |
+| `npm run start-local` | Start node + deploy in one step |
+| `npm run clean` | Remove build artifacts |
 
-```typescript
-export const META_NEST_WALLET_ABI = [
-  'function getEthBalance(address user) external view returns (uint256)',
-  'function sendEth(address to, uint256 amount, string calldata memo) external payable',
-  'function sendToken(address token, address to, uint256 amount, string calldata memo) external',
-  'function addContact(address contactAddress, string calldata name) external',
-  'function updateContact(address contactAddress, string calldata name) external',
-  'function deleteContact(address contactAddress) external',
-  'function getContact(address user, address contactAddress) external view returns (string memory)',
-  'function getRecentTransactions(address user) external view returns (tuple(address token, address to, uint256 amount, uint256 timestamp)[])',
-  'function depositEth() external payable',
-  'function withdrawEth(uint256 amount) external',
-  // Events
-  'event TokenSent(address indexed from, address indexed to, address indexed token, uint256 amount, string memo)',
-  'event EthSent(address indexed from, address indexed to, uint256 amount, string memo)',
-  'event ContactAdded(address indexed user, address indexed contactAddress, string name)',
-  'event ContactUpdated(address indexed user, address indexed contactAddress, string name)',
-  'event ContactDeleted(address indexed user, address indexed contactAddress)',
-  'event EthDeposited(address indexed user, uint256 amount)',
-  'event EthWithdrawn(address indexed user, uint256 amount)',
-];
+### Frontend (`MetaNest-Application/`)
+
+| Command | Description |
+|---|---|
+| `npm run dev` | Start development server |
+| `npm run build` | Production build |
+| `npm run start` | Serve production build |
+| `npm run lint` | Run ESLint |
+
+### Docker
+
+| Command | Description |
+|---|---|
+| `npm run docker:start` | Start all containers (prod) |
+| `npm run docker:start:dev` | Start with volume mounts (dev) |
+| `npm run docker:logs` | Tail all container logs |
+| `npm run docker:stop` | Stop and remove containers |
+
+---
+
+## 🧪 Testing
+
+```bash
+# Run the full smart contract test suite
+npm test
 ```
 
-#### ERC20 ABI
+The test suite covers:
 
-```typescript
-export const ERC20_ABI = [
-  'function name() external view returns (string memory)',
-  'function symbol() external view returns (string memory)',
-  'function decimals() external view returns (uint8)',
-  'function totalSupply() external view returns (uint256)',
-  'function balanceOf(address account) external view returns (uint256)',
-  'function transfer(address to, uint256 amount) external returns (bool)',
-  'function allowance(address owner, address spender) external view returns (uint256)',
-  'function approve(address spender, uint256 amount) external returns (bool)',
-  'function transferFrom(address from, address to, uint256 amount) external returns (bool)',
-  'event Transfer(address indexed from, address indexed to, uint256 value)',
-  'event Approval(address indexed owner, address indexed spender, uint256 value)',
-];
-```
+- ✅ ETH deposit, withdrawal, and transfer
+- ✅ ERC20 token sends
+- ✅ Contact add / update / delete
+- ✅ Transaction history retrieval
+- ✅ Pause / unpause (owner-only guard)
+- ✅ Revert conditions and error handling
 
-### Network Configuration
-
-```typescript
-export const NETWORK_CONFIG = {
-  chainId: 31337,
-  chainName: 'MetaNest Local',
-  rpcUrl: 'http://127.0.0.1:8545',
-  blockExplorer: '',
-  nativeCurrency: {
-    name: 'Ether',
-    symbol: 'ETH',
-    decimals: 18,
-  },
-};
+```javascript
+describe('MetaNestWallet', () => {
+  describe('Token Transfers', () => { ... })
+  describe('Contact Management', () => { ... })
+  describe('Transaction History', () => { ... })
+  describe('Security & Pausable', () => { ... })
+})
 ```
 
 ---
 
-## 🛠️ Development Guide
+## 🚀 Production Deployment
 
-### Prerequisites
-
-- Node.js v18 or higher
-- npm or yarn
-- Git
-- MetaMask browser extension
-
-### Local Development Setup
-
-#### 1. Clone Repository
+### 1 — Deploy Contracts to a Live Network
 
 ```bash
-git clone <repository-url>
-cd metanest
-```
-
-#### 2. Install Dependencies
-
-```bash
-# Install blockchain dependencies
-npm install
-
-# Install frontend dependencies
-cd MetaNest-Application
-npm install
-cd ..
-```
-
-#### 3. Start Development Environment
-
-```bash
-# Start blockchain and deploy contracts
-npm run start-local
-
-# In another terminal, start frontend
-cd MetaNest-Application
-npm run dev
-```
-
-#### 4. Configure MetaMask
-
-- Add network: `http://127.0.0.1:8545` (Chain ID: 31337)
-- Import test accounts using private keys from terminal output
-
-### Available Scripts
-
-#### Blockchain Scripts
-
-```bash
-npm run compile          # Compile smart contracts
-npm run test            # Run contract tests
-npm run node            # Start Hardhat node only
-npm run deploy          # Deploy contracts to localhost
-npm run start-local     # Start node + deploy contracts
-npm run clean           # Clean build artifacts
-```
-
-#### Frontend Scripts
-
-```bash
-cd MetaNest-Application
-npm run dev             # Start development server
-npm run build           # Build for production
-npm run start           # Start production server
-npm run lint            # Run ESLint
-```
-
-### Code Style Guidelines
-
-#### Solidity
-
-- Use SPDX license identifier
-- Follow Solidity style guide
-- Add comprehensive comments
-- Use custom errors for gas efficiency
-
-#### TypeScript/React
-
-- Use TypeScript strict mode
-- Follow ESLint configuration
-- Use functional components with hooks
-- Implement proper error handling
-
----
-
-## 🚀 Deployment
-
-### Docker Deployment
-
-#### Production Mode
-
-```bash
-# Start all services
-npm run docker:start
-
-# Check status
-docker-compose ps
-
-# View logs
-npm run docker:logs
-
-# Stop services
-npm run docker:stop
-```
-
-#### Development Mode
-
-```bash
-# Start with volume mounts
-npm run docker:start:dev
-
-# View development logs
-npm run docker:logs:dev
-
-# Stop development services
-npm run docker:stop:dev
-```
-
-### Manual Deployment
-
-#### 1. Deploy Smart Contracts
-
-```bash
-# Compile contracts
 npm run compile
-
-# Deploy to target network
-npm run deploy -- --network <network-name>
+npm run deploy -- --network <network-name>   # e.g. sepolia, mainnet
 ```
 
-#### 2. Update Frontend Configuration
+### 2 — Update Contract Addresses
 
-Update contract addresses in `MetaNest-Application/lib/contracts.ts`:
+Edit `MetaNest-Application/lib/contracts.ts`:
 
 ```typescript
 export const CONTRACTS = {
-  META_NEST_WALLET: '0x...', // Deployed contract address
-  USDC_TOKEN: '0x...',
-  DAI_TOKEN: '0x...',
+  META_NEST_WALLET: '0x...', // your deployed address
+  USDC_TOKEN:       '0x...',
+  DAI_TOKEN:        '0x...',
 };
 ```
 
-#### 3. Build and Deploy Frontend
+### 3 — Build & Serve Frontend
 
 ```bash
 cd MetaNest-Application
@@ -498,161 +395,92 @@ npm run start
 
 ---
 
-## 🧪 Testing
-
-### Smart Contract Testing
-
-#### Run All Tests
-
-```bash
-npm test
-```
-
-#### Test Coverage
-
-The test suite covers:
-
-- Token transfer functionality
-- Contact management
-- Transaction history
-- Pausable functionality
-- Error handling
-- ETH operations
-
-#### Test Structure
-
-```javascript
-describe('MetaNestWallet', function () {
-  describe('Token Transfer Functionality', function () {
-    it('Should transfer tokens successfully', async function () {
-      // Test implementation
-    });
-  });
-
-  describe('Contact Management', function () {
-    it('Should add, update, and delete contacts', async function () {
-      // Test implementation
-    });
-  });
-});
-```
-
-### Frontend Testing
-
-#### Component Testing
-
-```bash
-cd MetaNest-Application
-npm test
-```
-
-#### E2E Testing
-
-```bash
-npm run test:e2e
-```
-
----
-
 ## 🐛 Troubleshooting
 
-### Common Issues
-
-#### Blockchain Connection Issues
+<details>
+<summary><strong>❌ Can't connect to blockchain</strong></summary>
 
 ```bash
-# Check if Hardhat node is running
+# Verify the Hardhat node is alive
 curl http://localhost:8545
 
-# Restart blockchain service
+# Restart it
 npm run node
 ```
 
-#### Contract Deployment Failures
+</details>
+
+<details>
+<summary><strong>❌ Contract deployment fails</strong></summary>
 
 ```bash
-# Check contract compilation
+# Recompile and re-check config
 npm run compile
-
-# Verify network configuration
 cat hardhat.config.js
-
-# Check deployment logs
 npm run deploy
 ```
 
-#### Frontend Issues
+</details>
+
+<details>
+<summary><strong>❌ Frontend won't start / stale cache</strong></summary>
 
 ```bash
-# Check dependencies
 cd MetaNest-Application
-npm install
-
-# Clear Next.js cache
 rm -rf .next
+npm install
 npm run dev
 ```
 
-#### MetaMask Issues
+</details>
 
-- Ensure MetaMask is unlocked
-- Check network configuration (Chain ID: 31337)
-- Verify contract addresses are correct
-- Clear browser cache and reload
+<details>
+<summary><strong>❌ MetaMask issues</strong></summary>
 
-### Debug Commands
+- ✅ MetaMask is unlocked
+- ✅ Network set to Chain ID `31337`, RPC `http://127.0.0.1:8545`
+- ✅ Contract addresses in `contracts.ts` match deployed output
+- ✅ Browser cache cleared
 
-#### Check Service Status
+</details>
 
-```bash
-# Docker services
-docker-compose ps
-
-# Local services
-netstat -an | grep :3000
-netstat -an | grep :8545
-```
-
-#### View Logs
+<details>
+<summary><strong>❌ Docker containers not starting</strong></summary>
 
 ```bash
-# Docker logs
-docker-compose logs -f
-
-# Hardhat logs
-npm run node
-
-# Frontend logs
-cd MetaNest-Application && npm run dev
+docker-compose ps          # check status
+docker-compose logs -f     # tail all logs
 ```
+
+</details>
 
 ---
 
-### Security Issues
+## 🔐 Security
 
-For security vulnerabilities:
+Found a vulnerability? **Please do not open a public GitHub issue.**
 
-- **DO NOT** create public issues
-- Email security team directly
-- Include detailed vulnerability description
-- Provide proof of concept if possible
+- 📧 Email the security team directly
+- Include a detailed description and proof of concept
+- We follow responsible disclosure and will respond promptly
 
 ---
 
 ## 📄 License
 
-This project is licensed under the MIT License. See [LICENSE](LICENSE) file for details.
+This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
 
 ---
 
-## 🔗 Links
+<div align="center">
 
-- **Repository**: [GitHub](https://github.com/your-username/metanest)
-- **Documentation**: [DOCS.md](DOCS.md)
-- **Docker Guide**: [DOCKER.md](DOCKER.md)
-- **Issues**: [GitHub Issues](https://github.com/your-username/metanest/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/your-username/metanest/discussions)
+**Built with ❤️ for Web3 newcomers and power users alike**
 
----
+[![GitHub](https://img.shields.io/badge/GitHub-Repo-181717?style=flat-square&logo=github)](https://github.com/your-username/metanest)
+[![Docs](https://img.shields.io/badge/Docs-DOCS.md-6366f1?style=flat-square)](DOCS.md)
+[![Docker Guide](https://img.shields.io/badge/Docker-DOCKER.md-2496ED?style=flat-square&logo=docker&logoColor=white)](DOCKER.md)
+[![Issues](https://img.shields.io/badge/Issues-GitHub-red?style=flat-square&logo=github)](https://github.com/your-username/metanest/issues)
 
-_Last updated: July 2025_
+*Last updated: May 2026*
+
+</div>
